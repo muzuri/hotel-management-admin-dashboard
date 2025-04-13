@@ -1,0 +1,150 @@
+import React, { useState } from 'react'
+import {motion} from 'framer-motion';
+
+const defaultValues = {
+    size:"",
+    bed_num:"",
+    currency: "",
+    price:"",
+    matt_size:"",
+    magnitude:"",
+    room_id:"",
+    bed_size_name:""
+}
+
+const BedRegister = ({updateMessage}) => {
+
+    const [formData, setFormData] = useState(defaultValues)
+    const [message, setMessage] = useState("")
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await fetch("http://localhost:8080/hotel/bed", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessage("Registration successful!");
+        setFormData(defaultValues);
+        updateMessage("listBed");
+      } else {
+        setMessage(data.error || "Something went wrong.");
+        setFormData(defaultValues);
+
+      }
+    } catch (error) {
+      setMessage("Error connecting to server.");
+    }
+  };
+
+  return (
+    <motion.div className='bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700'
+    initial={{ opacity: 0, y: 2 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.4 }}
+    > 
+      <form onSubmit={handleSubmit} className="space-y-4">
+      <input
+          type="text"
+          name="size"
+          placeholder="Bed Size"
+          value={formData.size}
+          onChange={handleChange}
+          className="border p-2 w-full rounded"
+          required
+        />
+        <br /><br />
+        <input
+          type="text"
+          name="bed_num"
+          placeholder="Bed Number"
+          value={formData.bed_num}
+          onChange={handleChange}
+          className="border p-2 w-full rounded"
+          required
+        />
+        <br /><br />
+        <input
+          type="text"
+          name="currency"
+          placeholder="Currency"
+          value={formData.currency}
+          onChange={handleChange}
+          className="border p-2 w-full rounded"
+          required
+        />
+               <br /><br />
+        <input
+          type="text"
+          name="price"
+          placeholder="Price"
+          value={formData.price}
+          onChange={handleChange}
+          className="border p-2 w-full rounded"
+          required
+        />
+           <br /><br />
+        <input
+          type="text"
+          name="matt_size"
+          placeholder="Mattress Size"
+          value={formData.matt_size}
+          onChange={handleChange}
+          className="border p-2 w-full rounded"
+          required
+        />
+           <br /><br />
+        <input
+          type="text"
+          name="magnitude"
+          placeholder="Magnitude"
+          value={formData.magnitude}
+          onChange={handleChange}
+          className="border p-2 w-full rounded"
+          required
+        />
+                <br /><br />
+        <input
+          type="text"
+          name="room_id"
+          placeholder="Room Id"
+          value={formData.room_id}
+          onChange={handleChange}
+          className="border p-2 w-full rounded"
+          required
+        />
+                <br /><br />
+        <input
+          type="text"
+          name="bed_size_name"
+          placeholder="Bed Size Name"
+          value={formData.bed_size_name}
+          onChange={handleChange}
+          className="border p-2 w-full rounded"
+          
+          required
+        />
+
+        <br /><br />
+        <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">Add Bed</button>
+      </form>
+      {message && <p>{message}</p>}
+    </motion.div>
+  )
+}
+
+export default BedRegister
