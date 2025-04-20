@@ -5,6 +5,7 @@ import BedRegister from '../components/Beds/BedRegister'
 import EditableTable from '../components/Beds/EditableTable'
 import UserRoom from '../components/rooms/UserRoom'
 import CRUDTable from '../components/rooms/CRUDTable'
+import AvailableBeds from '../components/Beds/AvailableBeds'
 
 const BedsPage = () => {
     const [message, setMessage] = useState("bedList");
@@ -24,7 +25,7 @@ const BedsPage = () => {
         :message ==='bookedBed'
         ? <CRUDTable/>
         :message === "availableBed"
-        ? <UserRoom></UserRoom>
+        ? <AvailableBeds updateMessage={updateMessage}></AvailableBeds>
         : <BedsTable updateMessage={updateMessage}></BedsTable>
         }
         </main>
