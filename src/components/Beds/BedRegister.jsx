@@ -40,7 +40,7 @@ const BedRegister = ({updateMessage}) => {
       if (res.ok) {
         setMessage("Registration successful!");
         setFormData(defaultValues);
-        updateMessage("listBed");
+        updateMessage("newB");
       } else {
         setMessage(data.error || "Something went wrong.");
         setFormData(defaultValues);

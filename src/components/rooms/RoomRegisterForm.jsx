@@ -65,8 +65,8 @@ const RoomRegisterForm = ({updateMessage, changeRegister}) => {
       const data = await res.json();
       console.log(data);
       setFormData({
-        created_by: "",
         size: "",
+        bed_size:"",
         floorNo: "",
         number_bed:"",
         room_category: "",
@@ -82,11 +82,7 @@ const RoomRegisterForm = ({updateMessage, changeRegister}) => {
 
     } catch (error) {
       console.error("Error submitting form:", error);
-    }
-
-      
-
-   
+    } 
   };
 
   return (
@@ -106,7 +102,7 @@ const RoomRegisterForm = ({updateMessage, changeRegister}) => {
           <label className="block font-semibold">Room Size in SQM</label>
           <input
             type="text"
-            name="name"
+            name="size"
             value={formData.size}
             onChange={handleChange}
             className="border p-2 w-full rounded bg-amber-200 text-black"
@@ -119,7 +115,7 @@ const RoomRegisterForm = ({updateMessage, changeRegister}) => {
           <label className="block font-semibold">Hotel Branch Number</label>
           <input
             type="text"
-            name="name"
+            name="branch_id"
             value={formData.branch_id}
             onChange={handleChange}
             className="border p-2 w-full rounded"
@@ -131,7 +127,7 @@ const RoomRegisterForm = ({updateMessage, changeRegister}) => {
           <label className="block font-semibold">Hotel Floor Number</label>
           <input
             type="text"
-            name="name"
+            name="floorNo"
             value={formData.floorNo}
             onChange={handleChange}
             className="border p-2 w-full rounded"
@@ -144,7 +140,7 @@ const RoomRegisterForm = ({updateMessage, changeRegister}) => {
           <label className="block font-semibold">Number of Bed</label>
           <input
             type="text"
-            name="name"
+            name="number_bed"
             value={formData.number_bed}
             onChange={handleChange}
             className="border p-1 min-w-200 rounded"
@@ -156,7 +152,7 @@ const RoomRegisterForm = ({updateMessage, changeRegister}) => {
           <label className="block font-semibold">Room Category</label>
           <input
             type="text"
-            name="name"
+            name="room_category"
             value={formData.room_category}
             onChange={handleChange}
             className="border p-2 w-full rounded"
@@ -168,8 +164,20 @@ const RoomRegisterForm = ({updateMessage, changeRegister}) => {
           <label className="block font-semibold">Room View</label>
           <input
             type="text"
-            name="name"
+            name="view"
             value={formData.view}
+            onChange={handleChange}
+            className="border p-2 w-full rounded"
+            required
+          />
+          {/* {errors.view && <p className="text-red-500 text-sm">{errors.view}</p>} */}
+        </div>
+        <div>
+          <label className="block font-semibold">Bed Size</label>
+          <input
+            type="text"
+            name="bed_size"
+            value={formData.bed_size}
             onChange={handleChange}
             className="border p-2 w-full rounded"
             required
@@ -180,7 +188,7 @@ const RoomRegisterForm = ({updateMessage, changeRegister}) => {
           <label className="block font-semibold">Room Price</label>
           <input
             type="text"
-            name="name"
+            name="price"
             value={formData.price}
             onChange={handleChange}
             className="border p-2 w-full rounded"
@@ -193,7 +201,7 @@ const RoomRegisterForm = ({updateMessage, changeRegister}) => {
           <label className="block font-semibold">Currency:</label>
           <input
             type="text"
-            name="name"
+            name="currency"
             value={formData.currency}
             onChange={handleChange}
             className="border p-2 w-full rounded"
@@ -206,7 +214,7 @@ const RoomRegisterForm = ({updateMessage, changeRegister}) => {
           <label className="block font-semibold">Room Description</label>
           <input
             type="text"
-            name="name"
+            name="room_desc"
             value={formData.room_desc}
             onChange={handleChange}
             className="border p-2 w-full rounded"

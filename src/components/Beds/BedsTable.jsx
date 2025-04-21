@@ -1,9 +1,9 @@
 import React from 'react'
 import { motion } from "framer-motion";
-import { Edit, Search, Trash2 } from "lucide-react";
+import { Edit, Search, Trash2, Plus } from "lucide-react";
 import { IoAddCircle, IoBed } from "react-icons/io5"
 import { useState, useEffect } from "react";
-import BedRegister from './BedRegister';
+import Buttons from '../common/Buttons';
 
 const BedsTable = ({updateMessage}) => {
     const [isLoading, setIsLoading] = useState(true);
@@ -11,31 +11,31 @@ const BedsTable = ({updateMessage}) => {
 	const [search, setSearch] = useState(""); // Search input state
 	const [filteredData, setFilteredData] = useState([]); // Store filtered data
     const [isListBed, setIsListBed] = useState(true);
-    const [buttons] = useState([
-        {
-          id: 1,
-          label: "Add Bed",
-          disabled: false,
-          icon: <IoAddCircle size={18}/>,
-          onClick: ()=> {updateMessage("newBed")},
-        },
-        {
-          id: 2,
-          label: "Booked Bed",
-          disabled: false,
-          icon: <IoBed/>,
-          onClick:() => updateMessage("bookedBed"),
-        },
-        {
-          id: 3,
-          label: "Available Bed",
-          icon: <IoBed size={18} />,
-          disabled: false,
-          onClick: () => {
-            updateMessage("availableBed")
-          },
-        }
-      ]);
+    // const [buttons] = useState([
+    //     {
+    //       id: 1,
+    //       label: "Add Bed",
+    //       disabled: false,
+    //       icon: <IoAddCircle size={18}/>,
+    //       onClick: ()=> {updateMessage("newBed")},
+    //     },
+    //     {
+    //       id: 2,
+    //       label: "Booked Bed",
+    //       disabled: false,
+    //       icon: <IoBed/>,
+    //       onClick:() => updateMessage("bookedBed"),
+    //     },
+    //     {
+    //       id: 3,
+    //       label: "Available Bed",
+    //       icon: <IoBed size={18} />,
+    //       disabled: false,
+    //       onClick: () => {
+    //         updateMessage("availableBed")
+    //       },
+    //     }
+    //   ]);
   
 	useEffect(() => {
 	  // Fetch data from API
@@ -83,14 +83,14 @@ const BedsTable = ({updateMessage}) => {
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ delay: 0.2 }}
-		>
-
-
-           
+		> 
             <div>
 			<div className='flex justify-between items-center mb-6'>
             <div className='flex gap-4 p-6'>
-        {buttons.map((btn) => (
+                <Buttons key={1} label={'Add new Bed'} icon= {<IoAddCircle size={18}></IoAddCircle>} onClick={()=> updateMessage("newBed")} ></Buttons>
+                <Buttons id={2} label={'Booked Bed'}  icon = {<IoBed size={18}></IoBed>}onClick={()=> updateMessage("bookedBed")} ></Buttons>
+                <Buttons id={3} label={'availableBed'} icon={<IoBed size={18}></IoBed>} onClick={()=> updateMessage("availableBed")} ></Buttons>
+        {/* {buttons.map((btn) => (
         <motion.button
           key={btn.id}
           whileTap={{ scale: 0.95 }}
@@ -102,9 +102,8 @@ const BedsTable = ({updateMessage}) => {
           {btn.icon}
           {btn.label}
         </motion.button>
-      ))}
+      ))} */}
     </div>
-				
 				<div className='relative'>
 					<input
 						type='text'
