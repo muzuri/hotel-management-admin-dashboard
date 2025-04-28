@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, BrowserRouter as Router } from 'react-router-dom'
 import OverviewPage from './pages/OverviewPage'
 import Sidebar from './components/Sidebar'
 import UsersPage from './pages/UsersPage'
@@ -9,6 +9,9 @@ import SettingsPage from './pages/SettingsPage'
 import BookingsPage from './pages/BookingsPage'
 import RoomPage from './pages/RoomPage'
 import BedsPage from './pages/BedsPage'
+import { AuthProvider } from './context/AuthContext';
+import LoginPage from './pages/LoginPage';
+import PrivateRoute from './components/Authentication/PrivateRoute'
 
 function App() {
   return (
@@ -19,18 +22,28 @@ function App() {
         <div className='absolute inset-0 bg-gradient-to-br from-gray-90 via-gray-900 to-gray-900 opacity-90'></div>
         <div className='absolute inset-0 backdrop-blur-sm'></div>
       </div>
+      <AuthProvider>
       <Sidebar></Sidebar>
       <Routes>
+        <Route path='/login' element={<LoginPage></LoginPage>}></Route>
         <Route path='/' element={<OverviewPage></OverviewPage>}> </Route>
         <Route path='/bookings' element={<BookingsPage></BookingsPage>}></Route>
         <Route path='/users' element={<UsersPage></UsersPage>}></Route>
         <Route path='/sales' element={<SalesPage></SalesPage>}></Route>
-        <Route path='/orders' element={<OrdersPage></OrdersPage>}></Route>
+        <Route path='/orders' element=
+        {<PrivateRoute>
+         <OrdersPage></OrdersPage>
+        </PrivateRoute>
+        }
+        ></Route>
+          
         <Route path='/analytics' element={<AnalyticsPage></AnalyticsPage>}></Route>
         <Route path='/settings' element={<SettingsPage></SettingsPage>}></Route>
         <Route path='/rooms' element={<RoomPage></RoomPage>}></Route>
         <Route path='/beds' element={<BedsPage></BedsPage>}></Route>
       </Routes>
+      
+      </AuthProvider>
     </div>
     
     
