@@ -29,10 +29,10 @@ const BookingsPage = () => {
           <BookingsTable></BookingsTable>
 
           {/* CHARTS */}
-          <div className='grid grid-col-1 lg:grid-cols-2 gap-8'>
+          {/* <div className='grid grid-col-1 lg:grid-cols-2 gap-8'>
             <SalesTrendCharts></SalesTrendCharts>
             <CategoryDistributionCharts></CategoryDistributionCharts>
-          </div>
+          </div> */}
         </main>
     </div>
     )

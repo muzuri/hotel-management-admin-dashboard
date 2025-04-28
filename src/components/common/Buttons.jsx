@@ -3,15 +3,6 @@ import { Search, Settings, Plus} from "lucide-react";
 import {motion} from 'framer-motion'
 
 const Buttons = ({label, disabled= false, onClick, icon, key}) => {
-    // const [buttons] = useState(
-    //     {
-    //         id: id,
-    //         label: label,
-    //         disabled: disabled,
-    //         icon: <Plus size={18}/>,
-    //         onClick: ()=> updateMessage(message)
-    //       }
-    //   );
   return (
     <div className='flex gap-4 p-6'>
     <motion.button
