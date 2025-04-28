@@ -11,7 +11,6 @@ import RoomPage from './pages/RoomPage'
 import BedsPage from './pages/BedsPage'
 
 function App() {
-
   return (
     <div className='flex h-screen bg-gray-900 text-gray-100 overflow-hidden'>
 

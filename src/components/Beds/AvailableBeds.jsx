@@ -3,6 +3,7 @@ import {motion} from 'framer-motion';
 import Header from '../common/Header';
 import { Edit, Search, Trash2 } from "lucide-react";
 import AlertMessage from '../common/AlertMessage';
+import WarningMessage from '../common/WarningMessage';
 
 const AvailableBeds = ({updateMessage}) => {
     const [data, setData] = useState([]);
@@ -60,13 +61,7 @@ const AvailableBeds = ({updateMessage}) => {
       if (!response.ok) {
           setError('Failed to submit the data. Please try again.')
       }
-      const data = await response.json()
-      
-      console.log('-------====>', data)
-    //   const rooms = data.map((room) => {
-    //       return {...room, beds: room.filter((bed) => bed.status === 'AVAILABLE')}
-    //     })
-    //   console.log('-------====>', data)
+      const data = await response.json();
       setData(data);
       setFilteredData(data);
         }
@@ -117,7 +112,7 @@ const AvailableBeds = ({updateMessage}) => {
 > 
     <Header title={'Available Beds'}></Header>
     <div>
-        {isInvalidRange && <AlertMessage type='error' message={'checkin Date should be less than Checkout Date'}></AlertMessage>}
+        {isInvalidRange && <WarningMessage message={'Checkin-date should be less than Checkout Date'}></WarningMessage>}
     </div>
     <div className="flex flex-col md:flex-row gap-4 mb-4">
     <label>Checkin-Date</label>
@@ -192,11 +187,11 @@ const AvailableBeds = ({updateMessage}) => {
 								Room Number
 							</th>
                             <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Bed Available Details
+								Available Bed Details
 							</th>
-                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+                            {/* <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Actions
-							</th>
+							</th> */}
 						</tr>
 					</thead>
 
@@ -213,32 +208,39 @@ const AvailableBeds = ({updateMessage}) => {
 					{bed.id}
 				</td>
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-                        {/* Hobbies */}
+                        {/* Available Beds Details in a Room */}
                 <td className="p-4 border-t">
+                {bed.beds.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
-                    {bed.beds.map((hobby, i) => (
+                    
+                    {bed.beds.map((bedAvailable, i) => (
                       <div
                         key={i}
                         className={`text-xs px-3 py-1 rounded-full font-medium shadow-sm`}
+                       
                       >
                         {/* <p>Bed Number: {hobby.bed_num} Bed Type: {hobby.bed_size_name}</p><br></br> */}
                         <div className="mb-2">
                         <h2 className="text-amber-50 text-base mb-4">Bed Details</h2>
-        {hobby.bed_num && <p className="text-sm text-blue-50">{hobby.bed_num}</p>}
+                        {console.log('Number of available Beds'+bed.beds.length)}
+        {bedAvailable.bed_num && <p onClick={() => selectedRow(bedAvailable)} className="text-sm text-blue-50">{bedAvailable.bed_num}</p>}
       </div>
      
-      {hobby.bed_size_name && <div className="text-sm text-blue-50">{hobby.bed_size_name}</div>}
+      {bedAvailable.bed_size_name && <div className="text-sm text-blue-50">{bedAvailable.bed_size_name}</div>}
     
                         
                       </div>
                     ))}
                   </div>
+                  ):(
+                  <div>
+                    <p className=''>no available beds</p>
+                  </div>)}
                 </td>
                 </td>
                 
-
-            
-                {bed.beds.map((hobby, i) => (
+            {/* I think we do not need to view details from Beds Available what we have is enough  */}
+             {/* {bed.beds.map((hobby, i) => (
                       <button
                         key={i}
                         className='text-green-600 hover:text-red-600' onClick={()=> setSelectedRow(hobby)}
@@ -246,7 +248,7 @@ const AvailableBeds = ({updateMessage}) => {
                        View Dedails
                       </button>
                       
-                    ))}
+                    ))} */}
                 {/* <button className='text-red-400 hover:text-red-600' onClick={()=> setSelectedRow(bed)}>View</button> */}
 				
 			</motion.tr>

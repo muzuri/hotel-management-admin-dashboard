@@ -2,13 +2,13 @@ import { motion } from "framer-motion";
 import { Edit, Search, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const BOOKING_DATA = [
-	{ id: 1, name: "Wireless Earbuds", category: "Electronics", price: 59.99, stock: 143, sales: 1200 },
-	{ id: 2, name: "Leather Wallet", category: "Accessories", price: 39.99, stock: 89, sales: 800 },
-	{ id: 3, name: "Smart Watch", category: "Electronics", price: 199.99, stock: 56, sales: 650 },
-	{ id: 4, name: "Yoga Mat", category: "Fitness", price: 29.99, stock: 210, sales: 950 },
-	{ id: 5, name: "Coffee Maker", category: "Home", price: 79.99, stock: 78, sales: 720 },
-];
+// const BOOKING_DATA = [
+// 	{ id: 1, name: "Wireless Earbuds", category: "Electronics", price: 59.99, stock: 143, sales: 1200 },
+// 	{ id: 2, name: "Leather Wallet", category: "Accessories", price: 39.99, stock: 89, sales: 800 },
+// 	{ id: 3, name: "Smart Watch", category: "Electronics", price: 199.99, stock: 56, sales: 650 },
+// 	{ id: 4, name: "Yoga Mat", category: "Fitness", price: 29.99, stock: 210, sales: 950 },
+// 	{ id: 5, name: "Coffee Maker", category: "Home", price: 79.99, stock: 78, sales: 720 },
+// ];
 
 const BookingsTable = () => {
 	const [isLoading, setIsLoading] = useState(true);
@@ -18,37 +18,27 @@ const BookingsTable = () => {
 	const [filteredData, setFilteredData] = useState([]); // Store filtered data
   
 	useEffect(() => {
-	  // Fetch data from API
-	  const  fetchData = async() => {
-	  const response = await fetch('http://localhost:8080/hotel/room/available', {
-		method: 'POST',
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({
-			"adult": 2,
-			"minor": 0,
-			"in": "2025-04-12",
-			"out": "2025-04-14"
-		})
-	})
-	if (!response.ok) {
-		setError('Failed to submit the data. Please try again.')
-	}
-	const data = await response.json()
-	const rooms = data.map((room) => {
-		return {...room, beds: room.beds.filter((bed) => bed.status === 'AVAILABLE')}
-	  })
-	console.log('-------====>', rooms)
-	setData(rooms);
-	  }
-	  fetchData();
-	}, []);
+		// Fetch data from API
+		const url = 'http://localhost:8080/hotel/booking'
+		const fetchData = async () => {
+		  try {
+			const response = await fetch(url);
+			const result = await response.json();
+			// console.log(result);
+			setData(result);
+			setFilteredData(result); // Initialize filteredData with full data
+			console.log(filteredData);
+		  } catch (error) {
+			console.error("Error fetching data:", error);
+		  }
+		};
+		fetchData();
+	  }, []);
   
 	useEffect(() => {
 	  // Filter data based on search input
 	  const filtered = data.filter((item) =>
-		item.room_category.toLowerCase().includes(search.toLowerCase())
+		item.booking_name.toLowerCase().includes(search.toLowerCase())
 	  );
 	  setFilteredData(filtered);
 	}, [search, data]);
@@ -72,7 +62,7 @@ const BookingsTable = () => {
 			transition={{ delay: 0.2 }}
 		>
 			<div className='flex justify-between items-center mb-6'>
-				<h2 className='text-xl font-semibold text-gray-100'>Booked Room List</h2>
+				<h2 className='text-xl font-semibold text-gray-100'>Bookings</h2>
 				<div className='relative'>
 					<input
 						type='text'
@@ -87,19 +77,6 @@ const BookingsTable = () => {
 				</div>
 			</div>
 
-			{/* "id": 4,
-    "created_by": "postgres",
-    "updated_by": null,
-    "created_at": "2025-03-15T21:57:06.995246",
-    "updated_at": null,
-    "size": null,
-    "bed_size": null,
-    "has_balcony": false,
-    "floorNo": 2,
-    "number_bed": 1,
-    "room_category": "Deluxe double room",
-    "view": "Swimming pool",
-    "currency": "USD", */}
 
 			<div className='overflow-x-auto'>
 				<table className='min-w-full divide-y divide-gray-700'>
@@ -109,22 +86,37 @@ const BookingsTable = () => {
 								Booking ID
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Room Categories
+								Booking Name
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Room View
+								Customer ID
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Payment Status
+								Checkin Date
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Checkin_Date
+								Checkout Date
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Checkout_Date
+								Amount Paid
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Checkout
+								Method
+							</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								Status
+							</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								Currency
+							</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								ID
+							</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								Booked By
+							</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								Booking Date
 							</th>
 						</tr>
 					</thead>
@@ -132,31 +124,37 @@ const BookingsTable = () => {
 					<tbody className='divide-y divide-gray-700'>
 					
           {filteredData.length > 0 ? (
-           filteredData.map((product) => (
+           filteredData.map((booking) => (
 			<motion.tr
-				key={product.id}
+				key={booking.id}
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				transition={{ duration: 0.3 }}
 			>
+				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+					{booking.id}
+				</td>
 				<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100 flex gap-2 items-center'>
-					<img
-						src='https://images.unsplash.com/photo-1627989580309-bfaf3e58af6f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8d2lyZWxlc3MlMjBlYXJidWRzfGVufDB8fDB8fHww'
-						alt='Product img'
-						className='size-10 rounded-full'
-					/>
-					{product.room_category}
+					{booking.booking_name}
 				</td>
-
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-					{product.price}
+					{booking.customer_id}
 				</td>
-
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-					${product.checking_in_date}
+					{booking.checking_in_date}
 				</td>
-				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{product.booking_name}</td>
-				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{product.booking_name}</td>
+				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.checking_out_date}</td>
+			
+	 <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.amount :'not yet payed'}</td> 
+	<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.payment_method:'not payed'}</td>
+	  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment? booking.payment.payment_status:'no pay method'}</td>
+	  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment? booking.payment.currency:'no currency'}</td>
+	  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment? booking.payment.payment_id:'no pay id'}</td> 
+	  
+				
+
+				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.booked_by}</td>
+				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.booking_date}</td>
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 					<button className='text-indigo-400 hover:text-indigo-300 mr-2'>
 						<Edit size={18} />
