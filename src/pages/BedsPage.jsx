@@ -6,6 +6,7 @@ import EditableTable from '../components/Beds/EditableTable'
 import UserRoom from '../components/rooms/UserRoom'
 import CRUDTable from '../components/rooms/CRUDTable'
 import AvailableBeds from '../components/Beds/AvailableBeds'
+import AssignRoomBeds from '../components/rooms/AssignRoomBeds'
 
 const BedsPage = () => {
     const [message, setMessage] = useState("bedList");
@@ -20,7 +21,9 @@ const BedsPage = () => {
         {/* <BedsTable></BedsTable> */}
         <main className='max-w-7xl mx-auto py-6 px-4 lg:px-8'>
         {
-        message ==='newBed'
+        message ==='assignBed'
+        ? <AssignRoomBeds updateMessage={updateMessage}></AssignRoomBeds>
+        : message ==='newBed'
         ? <BedRegister updateMessage={updateMessage}></BedRegister>
         :message ==='bookedBed'
         ? <CRUDTable/>

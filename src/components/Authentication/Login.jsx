@@ -1,20 +1,26 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import { useNavigate } from "react-router-dom";
 import { useAuth } from '../../context/AuthContext';
 import { motion } from 'framer-motion';
 import { AiOutlineTwitter } from "react-icons/ai";
 import { BiLogoFacebook } from "react-icons/bi";
+import { Link } from 'react-router-dom';
 
 const Login = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loginForm, setLoginForm] = useState(true);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const handleRegister = () =>{
+    setLoginForm(false)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await login(username, password);
+      await login(email, password);
       navigate("/");
     } catch (error) {
       alert(error.message);
@@ -28,6 +34,7 @@ const Login = () => {
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: 0.2 }}
   >
+    
     <section className="h-screen flex flex-col md:flex-row justify-center space-y-10 md:space-y-0 md:space-x-16 items-center my-2 mx-5 md:mx-0 md:my-0">
     <div className="md:w-1/3 max-w-sm">
       <img
@@ -66,8 +73,8 @@ const Login = () => {
         className="text-sm w-full px-4 py-2 border border-solid border-gray-300 rounded"
         type="text"
         placeholder="Email Address"
-        value={username} 
-        onChange={(e) => setUsername(e.target.value)}
+        value={email} 
+        onChange={(e) => setEmail(e.target.value)}
       />
       <input
         className="text-sm w-full px-4 py-2 border border-solid border-gray-300 rounded mt-4"
@@ -99,13 +106,16 @@ const Login = () => {
         Don&apos;t have an account?{" "}
         <a
           className="text-red-600 hover:underline hover:underline-offset-4"
-          href="#"
+         
         >
-          Register
+        <Link to="/registration">Register</Link>  
+          
+          
         </a>
       </div>
     </div>
   </section>
+
   </motion.div>
   );
 }

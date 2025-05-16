@@ -12,7 +12,7 @@ const defaultValues = {
     bed_size_name:""
 }
 
-const BedRegister = ({updateMessage}) => {
+const BedRegister = ({updateMessage, room_id}) => {
 
     const [formData, setFormData] = useState(defaultValues)
     const [message, setMessage] = useState("")
@@ -40,7 +40,7 @@ const BedRegister = ({updateMessage}) => {
       if (res.ok) {
         setMessage("Registration successful!");
         setFormData(defaultValues);
-        updateMessage("newB");
+        // updateMessage("newB");
       } else {
         setMessage(data.error || "Something went wrong.");
         setFormData(defaultValues);
@@ -118,11 +118,12 @@ const BedRegister = ({updateMessage}) => {
           required
         />
                 <br /><br />
+                <p>{`Room is ${room_id}`}</p>
         <input
           type="text"
           name="room_id"
-          placeholder="Room Id"
-          value={formData.room_id}
+          placeholder={room_id}
+          value={room_id}
           onChange={handleChange}
           className="border p-2 w-full rounded"
           required

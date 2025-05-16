@@ -112,7 +112,7 @@ const BookingsTable = () => {
 				transition={{ duration: 0.3 }}
 			>
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-					{booking.id}
+					{booking.reference}
 				</td>
 				<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100 flex gap-2 items-center'>
 					{booking.booking_name}

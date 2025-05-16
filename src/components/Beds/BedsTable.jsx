@@ -87,7 +87,7 @@ const BedsTable = ({updateMessage}) => {
             <div>
 			<div className='flex justify-between items-center mb-6'>
             <div className='flex gap-4 p-6'>
-                <Buttons key={1} label={'Add new Bed'} icon= {<IoAddCircle size={18}></IoAddCircle>} onClick={()=> updateMessage("newBed")} ></Buttons>
+                <Buttons key={1} label={'Add new Bed'} icon= {<IoAddCircle size={18}></IoAddCircle>} onClick={()=> updateMessage("assignBed")} ></Buttons>
                 <Buttons id={2} label={'Booked Bed'}  icon = {<IoBed size={18}></IoBed>}onClick={()=> updateMessage("bookedBed")} ></Buttons>
                 <Buttons id={3} label={'availableBed'} icon={<IoBed size={18}></IoBed>} onClick={()=> updateMessage("availableBed")} ></Buttons>
         {/* {buttons.map((btn) => (

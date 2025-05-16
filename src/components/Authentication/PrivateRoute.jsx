@@ -1,10 +1,26 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth }  from "../../context/AuthContext";
+import * as jwt_decode from 'jwt-decode';
+
 
 const PrivateRoute = ({ children }) => {
-  const { user } = useAuth();
+  const { token } = useAuth();
+  
+//   const isTokenValid = () => {
+//     if (!token) return false;
 
-  if (!user) {
+//     try {
+//         console.log("Is Token Valid "+isTokenValid)
+//         const decoded = jwt_decode.default(token);
+//       const currentTime = Date.now() / 1000;
+      
+//       return decoded.exp > currentTime;
+//     } catch (error) {
+//       return false;
+//     }
+
+//   }
+  if (!token) {
     return <Navigate to="/login" replace />;
   }
 

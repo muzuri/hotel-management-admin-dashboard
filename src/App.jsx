@@ -12,6 +12,7 @@ import BedsPage from './pages/BedsPage'
 import { AuthProvider } from './context/AuthContext';
 import LoginPage from './pages/LoginPage';
 import PrivateRoute from './components/Authentication/PrivateRoute'
+import RegistrationPage from './pages/RegistrationPage'
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
       <Sidebar></Sidebar>
       <Routes>
         <Route path='/login' element={<LoginPage></LoginPage>}></Route>
+        <Route path='/registration' element={<RegistrationPage></RegistrationPage>}></Route>
         <Route path='/' element={<OverviewPage></OverviewPage>}> </Route>
         <Route path='/bookings' element={<BookingsPage></BookingsPage>}></Route>
         <Route path='/users' element={<UsersPage></UsersPage>}></Route>
