@@ -8,7 +8,6 @@ import axios from 'axios';
 import { debounce } from "lodash";
 import UserRoom from './UserRoom';
 import LoadingRing from '../common/LoadingRing';
-const api1 = 'https://jsonplaceholder.typicode.com/albums/'
 
 const RoomTable = ({updateMessage,bookedRom }) => {
     // State to hold the data, loading status, and any errors
@@ -23,11 +22,6 @@ const RoomTable = ({updateMessage,bookedRom }) => {
     const [selectedRow, setSelectedRow] = useState(null);
     const[open, setOpen]= useState(false);
     const [register, setRegister] = useState(false);
-    const [user, setUser] = useState({
-      bookedRoom: "John",
-      age: 30,
-      city: "New York"
-    });
     const [buttons] = useState([
       {
         id: 1,
@@ -87,7 +81,7 @@ const RoomTable = ({updateMessage,bookedRom }) => {
 };
   // Delete Function
   const handleDelete = async (roomId) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete?");
+    const confirmDelete = window.confirm(`Are you sure you want to delete Room with Room Number ${roomId}?`);
     if(confirmDelete){
     if (!roomId) return;
 

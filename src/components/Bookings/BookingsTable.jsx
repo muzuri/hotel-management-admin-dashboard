@@ -16,10 +16,10 @@ const BookingsTable = () => {
 		  try {
 			const response = await fetch(url);
 			const result = await response.json();
-			// console.log(result);
+			console.log(result);
 			setData(result);
+			console.log(result);
 			setFilteredData(result); // Initialize filteredData with full data
-			console.log(filteredData);
 		  } catch (error) {
 			console.error("Error fetching data:", error);
 		  }
@@ -30,7 +30,7 @@ const BookingsTable = () => {
 	useEffect(() => {
 	  // Filter data based on search input
 	  const filtered = data.filter((item) =>
-		item.booking_name.toLowerCase().includes(search.toLowerCase())
+		item.reference.toLowerCase().includes(search.toLowerCase())
 	  );
 	  setFilteredData(filtered);
 	}, [search, data]);
@@ -47,7 +47,7 @@ const BookingsTable = () => {
 				<div className='relative'>
 					<input
 						type='text'
-						placeholder='Search Booking...'
+						placeholder='Search by booking id ...'
 						className='bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
@@ -63,19 +63,25 @@ const BookingsTable = () => {
 					<thead>
 						<tr>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								Bed ID
+							</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Booking ID
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Booking Name
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Customer ID
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Checkin Date
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Checkout Date
+							</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								Reference ID
+							</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								Booking Name
+							</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								Customer ID
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Amount Paid
@@ -104,13 +110,31 @@ const BookingsTable = () => {
 					<tbody className='divide-y divide-gray-700'>
 					
           {filteredData.length > 0 ? (
-           filteredData.map((booking) => (
+           filteredData.map((booking, bookingId) =>
+			booking.booked_beds.map((bed, bedId)=>
+			(
 			<motion.tr
-				key={booking.id}
+				key={bedId}
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				transition={{ duration: 0.3 }}
 			>
+				{bookingId === 0 && (
+                  <>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+                      {bed.bed_id}
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+                      {bed.booking_id}
+                    </td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+                      {bed.checking_in_date}
+                    </td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+                      {bed.checking_out_date}
+                    </td>
+                  </>
+                )}
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 					{booking.reference}
 				</td>
@@ -120,22 +144,15 @@ const BookingsTable = () => {
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 					{booking.customer_id}
 				</td>
-				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-					{booking.checking_in_date}
-				</td>
-				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.checking_out_date}</td>
 			
 	 <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.amount :'not yet payed'}</td> 
 	<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.payment_method:'not payed'}</td>
-	  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment? booking.payment.payment_status:'no pay method'}</td>
-	  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment? booking.payment.currency:'no currency'}</td>
-	  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment? booking.payment.payment_id:'no pay id'}</td> 
-	  
-				
-
-				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.booked_by}</td>
-				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.booking_date}</td>
-				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+	<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment? booking.payment.payment_status:'no pay method'}</td>
+	<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment? booking.payment.currency:'no currency'}</td>
+	<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment? booking.payment.payment_id:'no pay id'}</td> 
+	<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.booked_by}</td>
+	<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.booking_date}</td>
+	<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 					<button className='text-indigo-400 hover:text-indigo-300 mr-2'>
 						<Edit size={18} />
 					</button>
@@ -144,7 +161,7 @@ const BookingsTable = () => {
 					</button>
 				</td>
 			</motion.tr>
-		))
+		)))
           ) : (
             <tr>
               <td colSpan="3" className="text-center p-4">No data found</td>
