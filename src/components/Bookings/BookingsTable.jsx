@@ -66,6 +66,9 @@ const BookingsTable = () => {
 								Bed ID
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								Room ID
+							</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Booking ID
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
@@ -114,15 +117,18 @@ const BookingsTable = () => {
 			booking.booked_beds.map((bed, bedId)=>
 			(
 			<motion.tr
-				key={bedId}
+				key={bookingId}
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				transition={{ duration: 0.3 }}
 			>
-				{bookingId === 0 && (
+				{bedId === 0 && (
                   <>
                     <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
                       {bed.bed_id}
+                    </td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+                      {bed.room_id}
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
                       {bed.booking_id}

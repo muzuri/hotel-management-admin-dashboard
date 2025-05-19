@@ -20,8 +20,23 @@ const RoomTable = ({updateMessage,bookedRom }) => {
     const [filteredData, setFilteredData] = useState([]); // Store filtered data
     const [isDelete, setIsDelete] = useState(false);
     const [selectedRow, setSelectedRow] = useState(null);
-    const[open, setOpen]= useState(false);
+    const[selectedRoom, setSelectedRoom] = useState(null);
+    const[showRoomsTable, setShowRoomsTable]= useState(true);
     const [register, setRegister] = useState(false);
+    const [editRowId, setEditRow] = useState(null);
+    const[showModal, setShowModal] = useState(false);
+    const [formData, setFormData] = useState({
+      size: "",
+      bed_size: "",
+      floorNo: "",
+      number_bed: "",
+      room_category: "",
+      view:"",
+      price:"",
+      currency:"",
+      room_desc:"",
+      branch_id:1
+    });
     const [buttons] = useState([
       {
         id: 1,
@@ -99,6 +114,103 @@ const RoomTable = ({updateMessage,bookedRom }) => {
 const clickEdit =()=>{
     updateMessage("editRoom")
 }
+const handleView = (room) => {
+  setSelectedRow(room);
+  setShowRoomsTable(false);
+}
+
+const handleUpdate = async () => {
+  try {
+    await axios.put(
+      `http://localhost:8080/hotel/room/${selectedRoom.id}`,
+      formData
+    );
+
+    const newData = rooms.map((u) =>
+      u.id === selectedRoom.id ? { ...u, ...formData } : u
+    );
+    setRoom(newData);
+    closeModal();
+  } catch (err) {
+    console.error("Update error:", err);
+  }
+};
+const closeModal = () => {
+  setSelectedRoom(null);
+  setFormData(
+    {
+      id:"",
+      size: "",
+      bed_size: "",
+      floorNo: "",
+      number_bed: "",
+      room_category: "",
+      view:"",
+      price:"",
+      currency:"",
+      room_desc:"",
+      branch_id:1
+    }
+  );
+  setShowModal(false);
+  setShowRoomsTable(true);
+};
+const openEditModal = (row) => {
+  setSelectedRoom(row);
+  setFormData(
+    {
+      id:row.id,
+      size: row.size,
+      bed_size: row.bed_size,
+      floorNo: row.floorNo,
+      number_bed: row.number_bed,
+      room_category: row.room_category,
+      view:row.view,
+      price:row.price,
+      currency:row.currency,
+      room_desc:row.room_desc,
+      branch_id:row.branch_id
+    }
+  );
+  setShowModal(true);
+  setShowRoomsTable(false)
+};
+// const handleEditClick = (row) =>{
+//   setEditRow(row.id)
+//   setFormData(
+//     {
+//       size: row.size,
+//       bed_size: row.bed_size,
+//       floorNo: row.floorNo,
+//       number_bed: row.number_bed,
+//       room_category: row.room_category,
+//       view:row.view,
+//       price:row.price,
+//       currency:row.currency,
+//       room_desc:row.room_desc,
+//       branch_id:row.branch_id
+//     }
+//   )
+// }
+// const handleCancelClick = () => {
+//   setEditRow(null);
+//   setFormData({
+//     size: "",
+//     bed_size: "",
+//     floorNo: "",
+//     number_bed: "",
+//     room_category: "",
+//     view:"",
+//     price:"",
+//     currency:"",
+//     room_desc:"",
+//     branch_id:1
+//   })
+// }
+const handleClose= () => {
+  setSelectedRow(null);
+  setShowRoomsTable(true);
+}
 
   // Render loading, error, or data depending on the state
   if (loading) {
@@ -149,7 +261,7 @@ const clickEdit =()=>{
           <p><strong>Room Description:</strong> {selectedRow.room_desc}</p>
           <p><strong>Price:</strong> {selectedRow.price}</p>
           <button
-            onClick={() => setSelectedRow(null)}
+            onClick={handleClose}
             className="mt-2 text-sm text-blue-600 hover:underline"
           >
             Close
@@ -158,7 +270,9 @@ const clickEdit =()=>{
         
       )}
 
+    
 			<div className='overflow-x-auto'>
+      {showRoomsTable && 
 				<table className='min-w-full divide-y divide-gray-700'>
 					<thead>
 						<tr>
@@ -166,19 +280,13 @@ const clickEdit =()=>{
 								Room Number
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
-								Floor No
+							Room Description
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
               Room Category
 							</th>
               <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
-								Beds
-							</th>
-              <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
-								View
-							</th>
-              <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
-								Currency
+								Number Beds
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
 								Actions
@@ -198,33 +306,385 @@ const clickEdit =()=>{
 
 							>
 								<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
-									{room.id}
+                  {/* {editRowId === room.id ? (
+                      <input
+                      type="text"
+                      name="size"
+                      value={formData.size}
+                      onChange={(e) =>
+                        setFormData({ ...formData, size: e.target.value })
+                      }
+                      className="border p-2 max-w-full rounded"
+                    />
+                  ) 
+                    : ( 
+                    room.size
+                    )} */}
+
+                    {room.id}
+									
 								</td>
-								<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
-									{room.floorNo}
-								</td>
-								<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
-									{room.room_category}
+								{/* <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
+                {editRowId === room.id ? (
+                      <input
+                      type="text"
+                      name="bed_size"
+                      value={formData.bed_size}
+                      onChange={(e) =>
+                        setFormData({ ...formData, bed_size: e.target.value })
+                      }
+                      className="border p-2 max-w-full rounded"
+                    />
+                  ) 
+                    : (
+                     room.size 
+                  )}
+									{room.bed_size}
+								</td> */}
+								{/* <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
+                {editRowId === room.id ? (
+                      <input
+                      type="text"
+                      name="floorNo"
+                      value={formData.floorNo}
+                      onChange={(e) =>
+                        setFormData({ ...formData, floorNo: e.target.value })
+                      }
+                      className="border p-2 max-w-full rounded"
+                    />
+                  ) 
+                    : (
+                      room.floorNo
+                  )}
+
+                  {room.floorNo}
+								</td> */}
+                <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
+                  {/* {editRowId === room.id ?
+                   (  <input
+                    type="text"
+                    name="number_bed"
+                    value={formData.number_bed}
+                    onChange={(e) =>
+                      setFormData({ ...formData, number_bed: e.target.value })
+                    }
+                    className="border p-2 max-w-full rounded"
+                  />)
+                  
+                  :(
+                    room.number_bed
+                    )} */}
+
+                    {room.room_desc}
+							
 								</td>
                 <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
-									{room.number_bed}
+                  {/* {editRowId === room.id ?
+                   (  <input
+                    type="text"
+                    name="room_category"
+                    value={formData.room_category}
+                    onChange={(e) =>
+                      setFormData({ ...formData, room_category: e.target.value })
+                    }
+                    className="border p-2 max-w-full rounded"
+                  />)
+                  
+                  :(
+                    room.room_category
+                    )} */}
+                    {room.room_category}
+							
 								</td>
                 <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
-									{room.view}
+                  {/* {editRowId === room.id ?
+                   (  <input
+                    type="text"
+                    name="view"
+                    value={formData.view}
+                    onChange={(e) =>
+                      setFormData({ ...formData, view: e.target.value })
+                    }
+                    className="border p-2 max-w-full rounded"
+                  />)
+                  
+                  :(
+                    room.view
+                    )} */}
+                    {room.number_bed}
+							
 								</td>
-                <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
-                   {room.currency}
-                </td>
+                {/* <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
+                  {editRowId === room.id ?
+                   (  <input
+                    type="text"
+                    name="price"
+                    value={formData.price}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
+                    className="border p-2 max-w-full rounded"
+                  />)
+                  
+                  :(
+                    room.price
+                    )}
+
+                    {room.price}
+							
+								</td> */}
+                {/* <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
+                  {editRowId === room.id ?
+                   (  <input
+                    type="text"
+                    name="currency"
+                    value={formData.currency}
+                    onChange={(e) =>
+                      setFormData({ ...formData, currency: e.target.value })
+                    }
+                    className="border p-2 max-w-full rounded"
+                  />)
+                  
+                  :(
+                    room.currency
+                    )}
+                    {room.currency}
+							
+								</td> */}
+                {/* <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
+                  {editRowId === room.id ?
+                   (  <input
+                    type="text"
+                    name="room_desc"
+                    value={formData.room_desc}
+                    onChange={(e) =>
+                      setFormData({ ...formData, room_desc: e.target.value })
+                    }
+                    className="border p-2 max-w-full rounded"
+                  />)
+                  
+                  :(
+                    room.room_desc
+                    )}
+
+                    {room.room_desc}
+							
+								</td> */}
+                {/* <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
+                  {editRowId === room.id ?
+                    <input
+                    type="text"
+                    name="branch_id"
+                    value={formData.branch_id}
+                    onChange={(e) =>
+                      setFormData({ ...formData, branch_id: e.target.value })
+                    }
+                    className="border p-2 max-w-full rounded"
+                  />
+                  
+                  :(
+                    room.branch_id
+                    )
+                    }
+                    {room.branch_id}
+                  
+							
+								</td> */}
 								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-									<button className='text-indigo-400 hover:text-indigo-300 mr-2' onClick={clickEdit}>Edit</button>
+                {/* {editRowId === room.id ? (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleSaveClick}
+                      className="bg-green-500 text-white px-3 py-1 rounded"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={handleCancelClick}
+                      className="bg-gray-400 text-white px-3 py-1 rounded"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : ( */}
+                  
+                  <button
+                    onClick={() => openEditModal(room)}
+                    className="bg-blue-500 text-white px-3 py-1 rounded"
+                  >
+                    Edit
+                  </button>
+                  <button className='text-red-400 hover:text-red-300 mr-4' 
+                  onClick={() => handleDelete(room.id)}>Delete</button>
+                  <button className='bg-amber-300 text-blue-700 hover:text-cyan-700' onClick={()=> handleView(room)}>View</button>
+                  
+                {/* )} */}
+									{/* <button className='text-indigo-400 hover:text-indigo-300 mr-2' onClick={clickEdit}>Edit</button>
                                     <button className="btn btn-secondary"></button>
 									<button className='text-red-400 hover:text-red-300 mr-4' onClick={() => handleDelete(room.id)}>Delete</button>
-                  <button className='text-red-400 hover:text-red-600' onClick={()=> setSelectedRow(room)}>View</button>
+                  <button className='text-red-400 hover:text-red-600' onClick={()=> setSelectedRow(room)}>View</button> */}
 								</td>
 							</motion.tr>
 						))}
 					</tbody>
 				</table>
+     }
+        {/* Edit Modal */}
+      {showModal && (
+        <div className="bg-gray-800 bg-opacity-50 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 bg-opacity-50 bg-opacity-50 rounded-xl p-6 w-full max-w-md shadow-lg">
+            <h3 className="text-lg font-bold mb-4">Edit Room</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block mb-1 text-sm font-medium">Room Size</label>
+                <input
+                      type="text"
+                      name="size"
+                      value={formData.size}
+                      onChange={(e) =>
+                        setFormData({ ...formData, size: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Bed Size</label>
+                <input
+                      type="text"
+                      name="bed_size"
+                      value={formData.bed_size}
+                      onChange={(e) =>
+                        setFormData({ ...formData, bed_size: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
+              {/* <div>
+                <label className="block mb-1 text-sm font-medium">Email</label>
+                <input
+                      type="text"
+                      name="bed_size"
+                      value={formData.bed_size}
+                      onChange={(e) =>
+                        setFormData({ ...formData, bed_size: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div> */}
+              <div>
+                <label className="block mb-1 text-sm font-medium">Floor No</label>
+                <input
+                      type="text"
+                      name="floorNo"
+                      value={formData.floorNo}
+                      onChange={(e) =>
+                        setFormData({ ...formData, floorNo: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Number of Beds</label>
+                <input
+                      type="text"
+                      name="number_bed"
+                      value={formData.number_bed}
+                      onChange={(e) =>
+                        setFormData({ ...formData, number_bed: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">View Info</label>
+                <input
+                      type="text"
+                      name="view"
+                      value={formData.view}
+                      onChange={(e) =>
+                        setFormData({ ...formData, view: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Room Category</label>
+                <input
+                      type="text"
+                      name="room_category"
+                      value={formData.room_category}
+                      onChange={(e) =>
+                        setFormData({ ...formData, room_category: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Room Description</label>
+                <input
+                      type="text"
+                      name="room_desc"
+                      value={formData.room_desc}
+                      onChange={(e) =>
+                        setFormData({ ...formData, room_desc: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Price</label>
+                <input
+                      type="text"
+                      name="price"
+                      value={formData.price}
+                      onChange={(e) =>
+                        setFormData({ ...formData, price: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Currency</label>
+                <input
+                      type="text"
+                      name="currency"
+                      value={formData.currency}
+                      onChange={(e) =>
+                        setFormData({ ...formData, currency: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Branch Id</label>
+                <input
+                      type="text"
+                      name="branch_id"
+                      value={formData.branch_id}
+                      onChange={(e) =>
+                        setFormData({ ...formData, branch_id: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <button
+                onClick={closeModal}
+                className="bg-gray-300 text-black px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdate}
+                className="bg-green-500 text-white px-4 py-2 rounded"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 			</div>
 		</motion.div>
   )

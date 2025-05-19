@@ -133,8 +133,11 @@ const BedsTable = ({updateMessage}) => {
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Size
 							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+							{/* <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Bed number
+							</th> */}
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								Room Number
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Currency
@@ -148,9 +151,9 @@ const BedsTable = ({updateMessage}) => {
                             <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
                             Number of Person
 							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+							{/* <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Mattles Size
-							</th>
+							</th> */}
                             <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Actions
 							</th>
@@ -185,13 +188,14 @@ const BedsTable = ({updateMessage}) => {
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 					{bed.size}
 				</td>
-				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.bed_num}</td>
+				{/* <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.bed_num}</td> */}
+				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.room_id}</td>
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.currency}</td>
                 <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.price}</td>
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.bed_size_name}</td>
                 <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.magnitude}</td>
-				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.matt_size}</td>
-                <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.room_id}</td>
+				{/* <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.matt_size}</td> */}
+                {/* <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.room_id}</td> */}
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 					<button className='text-indigo-400 hover:text-indigo-300 mr-2'>
 						<Edit size={18} />
