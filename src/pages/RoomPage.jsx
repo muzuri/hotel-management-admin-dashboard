@@ -22,10 +22,10 @@ const RoomPage = () => {
         ? <EditRoom/>
         :message ==='newRoom'
         ? <RoomRegisterForm updateMessage={updateMessage}/>
-        :message ==='bookedRooms'
-        ? <CRUDTable/>
-        :message === "availableRooms"
-        ? <UserRoom></UserRoom>
+        // :message ==='bookedRooms'
+        // ? <CRUDTable/>
+        // :message === "availableRooms"
+        // ? <UserRoom></UserRoom>
         : <RoomTable updateMessage={updateMessage}></RoomTable>
         }
         </main>

@@ -3,9 +3,9 @@ import { motion } from "framer-motion";
 
 import Header from "../components/common/Header";
 import StatCard from "../components/common/StatCard";
-import UserGrowthChart from "../components/users/UserGrowthChart";
+// import UserGrowthChart from "../components/users/UserGrowthChart";
 // import UserActivityHeatmap from "../components/users/UserActivityHeatmap";
-import UserDemographicsChart from "../components/users/UserDemographicsChart";
+// import UserDemographicsChart from "../components/users/UserDemographicsChart";
 import UsersTable from "../components/users/usersTable";
 
 const userStats = {
@@ -29,7 +29,7 @@ const UsersPage = () => {
 					transition={{ duration: 1 }}
 				>
 					
-					<StatCard
+					{/* <StatCard
 						name='Total Users'
 						icon={UsersIcon}
 						value={userStats.totalUsers.toLocaleString()}
@@ -42,16 +42,16 @@ const UsersPage = () => {
 						value={userStats.activeUsers.toLocaleString()}
 						color='#F59E0B'
 					/>
-					<StatCard name='Churn Rate' icon={UserX} value={userStats.churnRate} color='#EF4444' />
+					<StatCard name='Churn Rate' icon={UserX} value={userStats.churnRate} color='#EF4444' /> */}
 				</motion.div>
 
 				<UsersTable></UsersTable>
 
 				{/* USER CHARTS */}
-				<div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8'>
+				{/* <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8'>
 					<UserGrowthChart/>
                     <UserDemographicsChart/>
-				</div>
+				</div> */}
 			</main>
 		</div>
 	);

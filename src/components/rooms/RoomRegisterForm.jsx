@@ -1,20 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
 import {motion} from 'framer-motion';
-import * as yup from "yup"
-// const defaultValues = {
-//   size: "",
-//     bed_size: "",
-//     floorNo: "",
-//     number_bed: "",
-//     room_category: "",
-//     view:"",
-//     price:"",
-//     currency:"",
-//     room_desc:"",
-//     branch_id:1
-// }
-    
 
 const RoomRegisterForm = ({updateMessage, changeRegister, room_id}) => {
   const [showHeader, setShowHeader] = useState(true)

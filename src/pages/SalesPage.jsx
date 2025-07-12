@@ -25,7 +25,7 @@ const SalesPage = () => {
             animate={{opacity:1, y:0}}
             transition={{delay: 0.1}}
             >
-                	<StatCard
+                	{/* <StatCard
                     
 						name='Total Revenue'
 						icon={DollarSign}
@@ -39,16 +39,16 @@ const SalesPage = () => {
 						value={salesStats.conversionRate.toLocaleString()}
 						color='#F59E0B'
 					/>
-					<StatCard name='Sales Growth' icon={CreditCard} value={salesStats.salesGrowth} color='#EF4444' />
+					<StatCard name='Sales Growth' icon={CreditCard} value={salesStats.salesGrowth} color='#EF4444' /> */}
 
             </motion.div>
-            <SalesChart/>
+            {/* <SalesChart/> */}
             {/* SALES CHARTS */}
-				<div className='grid grid-cols-2 lg:grid-cols-2 gap-6 mt-8'>
+				{/* <div className='grid grid-cols-2 lg:grid-cols-2 gap-6 mt-8'>
                     
                     <SalesByCategoryChart></SalesByCategoryChart>
                     <DailySalesTrend></DailySalesTrend>
-				</div>
+				</div> */}
         </main>
 
     </div>

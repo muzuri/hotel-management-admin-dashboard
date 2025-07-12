@@ -1,18 +1,20 @@
 import React, { useState } from 'react'
 import {motion} from 'framer-motion';
 
-const defaultValues = {
+
+
+const BedRegister = ({updateMessage, room_id}) => {
+  const defaultValues = {
     size:"",
     bed_num:"",
     currency: "",
     price:"",
     matt_size:"",
     magnitude:"",
-    room_id:"",
+    room_id:room_id,
     bed_size_name:""
 }
 
-const BedRegister = ({updateMessage, room_id}) => {
 
     const [formData, setFormData] = useState(defaultValues)
     const [message, setMessage] = useState("")
@@ -38,6 +40,7 @@ const BedRegister = ({updateMessage, room_id}) => {
       const data = await res.json();
 
       if (res.ok) {
+        console.log(data);
         setMessage("Registration successful!");
         setFormData(defaultValues);
         // updateMessage("newB");

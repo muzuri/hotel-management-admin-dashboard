@@ -26,7 +26,7 @@ const OrdersPage = () => {
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 1 }}
 				>
-					<StatCard name='Total Booked Rooms' icon={ShoppingBag} value={orderStats.totalOrders} color='#6366F1' />
+					{/* <StatCard name='Total Booked Rooms' icon={ShoppingBag} value={orderStats.totalOrders} color='#6366F1' />
 					<StatCard name='Total Pending Payment' icon={Clock} value={orderStats.pendingOrders} color='#F59E0B' />
 					<StatCard
 						name='Total Payed Rooms'
@@ -34,15 +34,15 @@ const OrdersPage = () => {
 						value={orderStats.completedOrders}
 						color='#10B981'
 					/>
-					<StatCard name='Number of Available Room' icon={DollarSign} value={orderStats.totalRevenue} color='#EF4444' />
+					<StatCard name='Number of Available Room' icon={DollarSign} value={orderStats.totalRevenue} color='#EF4444' /> */}
 				</motion.div>
 
 				<div className='grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8'>
-					<DailyOrders />
-					<OrderDistribution />
+					{/* <DailyOrders />
+					<OrderDistribution /> */}
 				</div>
 
-				<OrdersTable />
+				{/* <OrdersTable /> */}
 			</main>
 		</div>
 	);

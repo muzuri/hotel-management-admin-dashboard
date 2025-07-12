@@ -3,14 +3,30 @@ import { motion } from "framer-motion";
 import { Edit, Search, Trash2, Plus } from "lucide-react";
 import { IoAddCircle, IoBed } from "react-icons/io5"
 import { useState, useEffect } from "react";
+import axios from 'axios';
+
 import Buttons from '../common/Buttons';
+import LoadingRing from '../common/LoadingRing';
 
 const BedsTable = ({updateMessage}) => {
     const [isLoading, setIsLoading] = useState(true);
 	const [data, setData] = useState([]); // Store API data
 	const [search, setSearch] = useState(""); // Search input state
 	const [filteredData, setFilteredData] = useState([]); // Store filtered data
-    const [isListBed, setIsListBed] = useState(true);
+	const [selectedRow, setSelectedRow] = useState(null);
+    const[selectedBed, setSelectedBed] = useState(null);
+    const[showBedsTable, setShowBedsTable]= useState(true);
+	const[showModal, setShowModal] = useState(false);
+	const [formData, setFormData] = useState({
+		size:"",
+		bed_num:"",
+		currency: "",
+		price:"",
+		status:"",
+		matt_size:"",
+		magnitude:"",
+		bed_size_name:""
+	  });
     // const [buttons] = useState([
     //     {
     //       id: 1,
@@ -52,8 +68,34 @@ const BedsTable = ({updateMessage}) => {
 		}
 	  };
 	  fetchData();
+	  setIsLoading(false)
 	}, []);
-      // Delete Function
+  
+	useEffect(() => {
+	  // Filter data based on search input
+	  const filtered = data.filter((item) =>
+		item.currency.toLowerCase().includes(search.toLowerCase())
+	  );
+	  setFilteredData(filtered);
+	}, [search, data]);
+	const closeModal = () => {
+		setSelectedBed(null);
+		setFormData(
+		  {
+			size:"",
+			bed_num:"",
+			currency: "",
+			price:"",
+			status:"",
+			matt_size:"",
+			magnitude:"",
+			bed_size_name:""
+		  }
+		);
+		setShowModal(false);
+		setShowBedsTable(true);
+	  };
+	   // Delete Function
   const handleDelete = async (bedId) => {
     // const confirmDelete = window.confirm("Are you sure you want to delete?");
     if (!bedId) return;
@@ -69,14 +111,59 @@ const BedsTable = ({updateMessage}) => {
       console.error("Error deleting item:", error);
     }
   };
-  
-	useEffect(() => {
-	  // Filter data based on search input
-	  const filtered = data.filter((item) =>
-		item.currency.toLowerCase().includes(search.toLowerCase())
+  const handleUpdate = async () => {
+	try {
+	  await axios.put(
+		`http://localhost:8080/hotel/bed/${selectedBed.id}`,
+		formData
 	  );
-	  setFilteredData(filtered);
-	}, [search, data]);
+  
+	  const newData = filteredData.map((u) =>
+		u.id === selectedBed.id ? { ...u, ...formData } : u
+	  );
+	//   console.log("new data are the following:")
+	//   console.log(newData);
+	  setData(newData);
+	  closeModal();
+	} catch (err) {
+	  console.error("Update error:", err);
+	}
+  };
+	  const openEditModal = (row) => {
+		setSelectedBed(row);
+		console.log(row);
+		setFormData(
+		  {
+		size:row.size,
+		bed_num:row.bed_num,
+		currency: row.currency,
+		price:row.price,
+		status:row.status,
+		matt_size:row.matt_size,
+		magnitude:row.magnitude,
+		bed_size_name:row.bed_size_name
+		  }
+		);
+		setShowModal(true);
+		setShowBedsTable(false)
+	  };
+	//   const openEdit = ()=> {
+	// 	setShowModal(true)
+	// 	setShowBedsTable(false)
+	//   }
+	  const handleClose= () => {
+		setSelectedRow(null);
+		setShowBedsTable(true);
+	  }
+	  
+		// Render loading, error, or data depending on the state
+		if (isLoading) {
+		  return <LoadingRing></LoadingRing>
+		}
+	  
+		// if (error) {
+		//   return <div>Error: {error}</div>;
+		// }
 	return (
 		<motion.div
 			className='bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700 mb-8'
@@ -84,26 +171,14 @@ const BedsTable = ({updateMessage}) => {
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ delay: 0.2 }}
 		> 
-            <div>
+
+        
 			<div className='flex justify-between items-center mb-6'>
             <div className='flex gap-4 p-6'>
                 <Buttons key={1} label={'Add new Bed'} icon= {<IoAddCircle size={18}></IoAddCircle>} onClick={()=> updateMessage("assignBed")} ></Buttons>
                 <Buttons id={2} label={'Booked Bed'}  icon = {<IoBed size={18}></IoBed>}onClick={()=> updateMessage("bookedBed")} ></Buttons>
                 <Buttons id={3} label={'availableBed'} icon={<IoBed size={18}></IoBed>} onClick={()=> updateMessage("availableBed")} ></Buttons>
-        {/* {buttons.map((btn) => (
-        <motion.button
-          key={btn.id}
-          whileTap={{ scale: 0.95 }}
-          disabled={btn.disabled}
-          onClick={btn.onClick}
-          className={`flex items-center gap-2 py-2 px-4 rounded-lg font-medium shadow-md transition-all
-            ${btn.disabled ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-green-500 hover:bg-indigo-600 text-white"}`}
-        >
-          {btn.icon}
-          {btn.label}
-        </motion.button>
-      ))} */}
-    </div>
+            </div>
 				<div className='relative'>
 					<input
 						type='text'
@@ -118,15 +193,16 @@ const BedsTable = ({updateMessage}) => {
 			</div>
             <h2 className='text-xl font-semibold text-gray-100'>List of Bed in Hotel</h2>
 			<div className='overflow-x-auto'>
+				{showBedsTable && 
 				<table className='min-w-full divide-y divide-gray-700'>
 					<thead>
 						<tr>
                         <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Bed Id
 							</th>
-                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+                            {/* <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Created By
-							</th>
+							</th> */}
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								created date
 							</th>
@@ -172,14 +248,14 @@ const BedsTable = ({updateMessage}) => {
                 <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 					{bed.id}
 				</td>
-				<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100 flex gap-2 items-center'>
+				{/* <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100 flex gap-2 items-center'>
 					<img
 						src='https://images.unsplash.com/photo-1627989580309-bfaf3e58af6f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8d2lyZWxlc3MlMjBlYXJidWRzfGVufDB8fDB8fHww'
 						alt='Product img'
 						className='size-10 rounded-full'
 					/>
 					{bed.created_by}
-				</td>
+				</td> */}
 
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 					{bed.created_at}
@@ -188,16 +264,13 @@ const BedsTable = ({updateMessage}) => {
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 					{bed.size}
 				</td>
-				{/* <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.bed_num}</td> */}
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.room_id}</td>
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.currency}</td>
                 <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.price}</td>
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.bed_size_name}</td>
                 <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.magnitude}</td>
-				{/* <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.matt_size}</td> */}
-                {/* <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.room_id}</td> */}
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-					<button className='text-indigo-400 hover:text-indigo-300 mr-2'>
+					<button className='text-indigo-400 hover:text-indigo-300 mr-2' onClick={()=> openEditModal(bed)}>
 						<Edit size={18} />
 					</button>
 					<button className='text-red-400 hover:text-red-300' onClick={() => handleDelete(bed.id)}>
@@ -213,9 +286,133 @@ const BedsTable = ({updateMessage}) => {
           )}
         </tbody>
 				</table>
+}
+
 			</div>
+			{showModal && (
+        <div className="bg-gray-800 bg-opacity-50 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 bg-opacity-50 bg-opacity-50 rounded-xl p-6 w-full max-w-md shadow-lg">
+            <h3 className="text-lg font-bold mb-4">Edit Room</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block mb-1 text-sm font-medium">Bed Size</label>
+                <input
+                      type="text"
+                      name="size"
+                      value={formData.size}
+                      onChange={(e) =>
+                        setFormData({ ...formData, size: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Bed Number</label>
+                <input
+                      type="text"
+                      name="bed_num"
+                      value={formData.bed_num}
+                      onChange={(e) =>
+                        setFormData({ ...formData, bed_num: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
+			
+              <div>
+                <label className="block mb-1 text-sm font-medium">Currency</label>
+                <input
+                      type="text"
+                      name="currency"
+                      value={formData.currency}
+                      onChange={(e) =>
+                        setFormData({ ...formData, currency: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Price</label>
+                <input
+                      type="text"
+                      name="price"
+                      value={formData.price}
+                      onChange={(e) =>
+                        setFormData({ ...formData, price: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Status</label>
+                <input
+                      type="text"
+                      name="status"
+                      value={formData.status}
+                      onChange={(e) =>
+                        setFormData({ ...formData, status: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
+			    	{/* 
+		matt_size:"",
+		magnitude:"",
+		bed_size_name:"" */}
+              <div>
+                <label className="block mb-1 text-sm font-medium">Mattress Size</label>
+                <input
+                      type="text"
+                      name="matt_size"
+                      value={formData.matt_size}
+                      onChange={(e) =>
+                        setFormData({ ...formData, matt_size: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Magnitude</label>
+                <input
+                      type="text"
+                      name="magnitude"
+                      value={formData.magnitude}
+                      onChange={(e) =>
+                        setFormData({ ...formData, magnitude: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Bed Size Name</label>
+                <input
+                      type="text"
+                      name="bed_size_name"
+                      value={formData.bed_size_name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, bed_size_name: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
             </div>
-             
+            <div className="flex justify-end gap-2 mt-6">
+              <button
+                onClick={closeModal}
+                className="bg-gray-300 text-black px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdate}
+                className="bg-green-500 text-white px-4 py-2 rounded"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}            
 		</motion.div>
 	);
 }

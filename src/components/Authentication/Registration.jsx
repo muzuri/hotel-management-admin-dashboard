@@ -88,18 +88,6 @@ const onSubmit = async (data) =>{
 </select>
 {errors.marital_status && <p className="text-red-500 text-sm">Status is required.</p>}
         </div>
- 
-        <div className='input wrapper flex flex-col'>
-<select
-  {...register("gender", { required: true })}
-  className="w-full p-2 border border-gray-300 rounded"
->
-  <option value="">Select gender</option>
-  <option value="male">Male</option>
-  <option value="female">Female</option>
-</select>
-{errors.gender && <p className="text-red-500 text-sm">Gender is required.</p>}
-        </div>
         <div className="input-wrapper flex flex-col">
           <input
           className={`border p-2 w-full rounded focus:outline-none 
@@ -134,6 +122,20 @@ const onSubmit = async (data) =>{
           />
           {errors.email && <p className="text-xs italic text-red-500">
             {errors.email.message}</p>}
+        </div>
+
+        <div className='input wrapper flex flex-col'>
+          <select
+          {
+           ...register("gender", { required: true })}
+          className="w-full p-2 border border-gray-300 rounded"
+          >
+            <option value="">Select gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            </select>
+            {
+            errors.gender && <p className="text-red-500 text-sm">Gender is required.</p>}
         </div>
 
         <div style={{ position: 'relative' }}>

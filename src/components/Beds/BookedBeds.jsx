@@ -5,7 +5,7 @@ import { Edit, Search, Trash2 } from "lucide-react";
 import AlertMessage from '../common/AlertMessage';
 import WarningMessage from '../common/WarningMessage';
 
-const AvailableBeds = ({updateMessage}) => {
+const BookedBeds = ({updateMessage}) => {
     const [data, setData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [checkinDate, setCheckinDate] = useState();
@@ -15,34 +15,38 @@ const AvailableBeds = ({updateMessage}) => {
     const [todayDate, setToday] = useState('');
     const [tomorrowDate, setTomorrow] = useState('');
     const [error, setError] = useState(null);
-    const [filterCheckin, setFilterCheckin] = useState("2025-10-15");
-    const [filterCheckout, setFilterCheckout] = useState("2025-10-16")
+    const [filterCheckin, setFilterCheckin] = useState(null);
+    const [filterCheckout, setFilterCheckout] = useState(null)
     const [bedDetails, setBedDetails ] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [adults, setAdults] = useState(1);
     const [minors, setMinors] = useState(0);
     const [numRooms, setNumRooms] = useState(1);
+    
 
 
   // Optional: Handle error message
 
     
+//   useEffect(() => {
+//     const initialDate = new Date();
+//     const todayDate = new Date();
+//     todayDate.setDate(initialDate.getDate() + 1)
+// const tomorrowDate = new Date();
+// tomorrowDate.setDate(initialDate.getDate() + 2);
+
+// const formatDate = (date) => {
+//   return date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+// };
+
+// setCheckinDate(formatDate(todayDate));
+// setCheckoutDate(formatDate(tomorrowDate));
+//   }, [])
     useEffect(() => {
-    //     const initialDate = new Date();
-    //     const todayDate = new Date();
-    //     todayDate.setDate(initialDate.getDate())
-    // const tomorrowDate = new Date();
-    // tomorrowDate.setDate(initialDate.getDate() + 1);
 
-    // const formatDate = (date) => {
-    //   return date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-    // };
-
-    // setFilterCheckin(formatDate(todayDate));
-    // setFilterCheckout(tomorrowDate);
-    console.log(todayDate);
-    console.log(tomorrowDate)
+    // console.log(todayDate);
+    // console.log(tomorrowDate)
         // Fetch data from API
         const  fetchData = async() => {
         const response = await fetch('http://localhost:8080/hotel/room/status', {
@@ -97,7 +101,7 @@ const AvailableBeds = ({updateMessage}) => {
     }
   };
   const availableBeds = (data) => {
-   return  data.map((bedAvailable) => bedAvailable.beds.filter((bed) => bed.status==='AVAILABLE'))
+   return  data.map((bedAvailable) => bedAvailable.beds.filter((bed) => bed.status==='BOOKED'))
   }
 
   const handleRowsChange = (e) => {
@@ -117,7 +121,7 @@ const AvailableBeds = ({updateMessage}) => {
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: 0.2 }}
 > 
-    <Header title={'Available Beds'}></Header>
+    <Header title={'Booked Beds'}></Header>
     <div>
         {isInvalidRange && <WarningMessage message={'Checkin-date should be less than Checkout Date'}></WarningMessage>}
     </div>
@@ -194,7 +198,7 @@ const AvailableBeds = ({updateMessage}) => {
 								Room Number
 							</th>
                             <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Available Bed Details
+								Booked Bed Details
 							</th>
                             {/* <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Actions
@@ -220,7 +224,7 @@ const AvailableBeds = ({updateMessage}) => {
                 {bed.beds.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
 
-                    {bed.beds.filter(bedAvailable => bedAvailable.status === "AVAILABLE")
+                    {bed.beds.filter(bedAvailable => bedAvailable.status === "BOOKED")
                     
                     .map((bedAvailable, i) => (
                       
@@ -318,4 +322,4 @@ const AvailableBeds = ({updateMessage}) => {
   )
 }
 
-export default AvailableBeds
+export default BookedBeds

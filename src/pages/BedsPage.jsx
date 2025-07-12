@@ -2,7 +2,7 @@ import React, {useState} from 'react'
 import Header from '../components/common/Header'
 import BedsTable from '../components/Beds/BedsTable'
 import BedRegister from '../components/Beds/BedRegister'
-import EditableTable from '../components/Beds/EditableTable'
+import BookedBeds from '../components/Beds/BookedBeds'
 import UserRoom from '../components/rooms/UserRoom'
 import CRUDTable from '../components/rooms/CRUDTable'
 import AvailableBeds from '../components/Beds/AvailableBeds'
@@ -26,7 +26,7 @@ const BedsPage = () => {
         : message ==='newBed'
         ? <BedRegister updateMessage={updateMessage}></BedRegister>
         :message ==='bookedBed'
-        ? <CRUDTable/>
+        ? <BookedBeds/>
         :message === "availableBed"
         ? <AvailableBeds updateMessage={updateMessage}></AvailableBeds>
         : <BedsTable updateMessage={updateMessage}></BedsTable>
