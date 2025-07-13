@@ -6,7 +6,7 @@ import StatCard from "../components/common/StatCard";
 // import UserGrowthChart from "../components/users/UserGrowthChart";
 // import UserActivityHeatmap from "../components/users/UserActivityHeatmap";
 // import UserDemographicsChart from "../components/users/UserDemographicsChart";
-import UsersTable from "../components/users/usersTable";
+import UsersTable from "../components/users/UsersTable";
 
 const userStats = {
 	totalUsers: 152845,

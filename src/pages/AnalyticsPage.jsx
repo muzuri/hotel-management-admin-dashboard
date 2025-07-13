@@ -1,6 +1,6 @@
 import AIPoweredInsights from "../components/analytics/AIPoweredInsights";
 import Header from "../components/common/Header";
-import Api from "../components/orders/api";
+import Api from "../components/orders/Api";
 
 import OverviewCards from "../components/analytics/OverviewCards";
 import RevenueChart from "../components/analytics/RevenueChart";
