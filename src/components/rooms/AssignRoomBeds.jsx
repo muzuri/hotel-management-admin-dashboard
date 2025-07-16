@@ -19,7 +19,7 @@ const AssignRoomBeds = () => {
 
     useEffect(() => {
         // Define the URL of the API
-        const url = 'http://localhost:8080/hotel/room';
+        const url = 'https://xenonhostel.com/hotel/room';
         // Fetch data
         fetch(url)
           .then((response) => {

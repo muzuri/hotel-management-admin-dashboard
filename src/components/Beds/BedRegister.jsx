@@ -29,7 +29,7 @@ const BedRegister = ({updateMessage, room_id}) => {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:8080/hotel/bed", {
+      const res = await fetch("https://xenonhostel.com/hotel/bed", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

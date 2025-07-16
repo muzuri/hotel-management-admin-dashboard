@@ -49,7 +49,7 @@ const BookedBeds = ({updateMessage}) => {
     // console.log(tomorrowDate)
         // Fetch data from API
         const  fetchData = async() => {
-        const response = await fetch('http://localhost:8080/hotel/room/status', {
+        const response = await fetch('https://xenonhostel.com/hotel/room/status', {
           method: 'POST',
           headers: {
               "Content-Type": "application/json",

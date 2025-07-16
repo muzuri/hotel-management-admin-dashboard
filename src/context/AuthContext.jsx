@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
    
       
       const handleLogin = async (email, password) => {
-        const res = await fetch("http://localhost:8080/api/hotel/public/login", {
+        const res = await fetch("https://xenonhostel.com/api/hotel/public/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
