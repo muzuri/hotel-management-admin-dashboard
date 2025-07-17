@@ -26,13 +26,13 @@ const BookingsTable = () => {
 			const result = await response.json();
 			setData(result);
 			setFilteredData(result); // Initialize filteredData with full data
+			console.log('filtered data ....')
+		    console.log(filteredData);
 		  } catch (error) {
 			console.error("Error fetching data:", error);
 		  }
 		};
 		fetchData();
-		console.log('filtered data')
-		console.log(filteredData);
 		totalRevenue(filteredData);
 		console.log('total revenue ........')
 		console.log(totalRevenue)
@@ -81,14 +81,14 @@ const BookingsTable = () => {
 		XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 		XLSX.writeFile(workbook, "table_data.xlsx");
 	}
-	// const totalRevenue = (data) =>{
-	// 	const total = data.reduce((sum, item)=> sum + item.payment.amount, 0);
-	// 	setTotalAmount(total.toFixed(2));
-	// }
 	const totalRevenue = (data) =>{
 		const total = data.reduce((sum, item)=> sum + 0, 0);
 		setTotalAmount(total.toFixed(2));
 	}
+	// const totalRevenue = (data) =>{
+	// 	const total = data.reduce((sum, item)=> sum + item.payment.amount, 0);
+	// 	setTotalAmount(total.toFixed(2));
+	// }
 
 	return (
 		<motion.div
