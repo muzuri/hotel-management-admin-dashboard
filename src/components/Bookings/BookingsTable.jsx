@@ -19,7 +19,7 @@ const BookingsTable = () => {
   
 	useEffect(() => {
 		// Fetch data from API
-		const url = 'https://xenonhostel.com/hotel/booking'
+		const url = 'https://api.xenonhostel.com/hotel/booking'
 		const fetchData = async () => {
 		  try {
 			const response = await fetch(url);

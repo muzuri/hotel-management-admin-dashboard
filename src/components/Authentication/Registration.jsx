@@ -28,7 +28,7 @@ const Registration = () => {
     
 const onSubmit = async (data) =>{
     try{
-        const response = await axios.post('http://localhost:8080/api/hotel/public/register', data);
+        const response = await axios.post('https://api.xenonhostel.com/api/hotel/public/register', data);
         console.log('Login success:', response.data);
     }
     catch(error ){

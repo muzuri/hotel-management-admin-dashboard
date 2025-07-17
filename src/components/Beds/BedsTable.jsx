@@ -55,7 +55,7 @@ const BedsTable = ({updateMessage}) => {
   
 	useEffect(() => {
 	  // Fetch data from API
-	  const url = 'https://xenonhostel.com/hotel/bed'
+	  const url = 'https://api.xenonhostel.com/hotel/bed'
 	  const fetchData = async () => {
 		try {
 		  const response = await fetch(url);
@@ -101,7 +101,7 @@ const BedsTable = ({updateMessage}) => {
     if (!bedId) return;
 
     try {
-      await fetch(`https://xenonhostel.com/hotel/bed/${bedId}`, {
+      await fetch(`https://api.xenonhostel.com/hotel/bed/${bedId}`, {
         method: "DELETE",
       });
 
@@ -114,7 +114,7 @@ const BedsTable = ({updateMessage}) => {
   const handleUpdate = async () => {
 	try {
 	  await axios.put(
-		`https://xenonhostel.com/hotel/bed/${selectedBed.id}`,
+		`https://api.xenonhostel.com/hotel/bed/${selectedBed.id}`,
 		formData
 	  );
   

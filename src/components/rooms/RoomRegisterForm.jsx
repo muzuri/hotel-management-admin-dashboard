@@ -27,7 +27,7 @@ const RoomRegisterForm = ({updateMessage, changeRegister, room_id}) => {
     e.preventDefault();
     // if (!validateForm()) return;
     try {
-      const res = await fetch("https://xenonhostel.com/hotel/room", {
+      const res = await fetch("https://api.xenonhostel.com/hotel/room", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

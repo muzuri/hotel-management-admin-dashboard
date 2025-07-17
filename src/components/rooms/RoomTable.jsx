@@ -69,7 +69,7 @@ const RoomTable = ({updateMessage,bookedRom }) => {
     // Fetch data when the component mounts
   useEffect(() => {
     // Define the URL of the API
-    const url = 'https://xenonhostel.com/hotel/room';
+    const url = 'https://api.xenonhostel.com/hotel/room';
     // Fetch data
     fetch(url)
       .then((response) => {
@@ -105,7 +105,7 @@ const RoomTable = ({updateMessage,bookedRom }) => {
     if (!roomId) return;
 
     try {
-      await fetch(`https://xenonhostel.com/hotel/room/${roomId}`, {
+      await fetch(`https://api.xenonhostel.com/hotel/room/${roomId}`, {
         method: "DELETE",
       });
 
@@ -126,7 +126,7 @@ const handleView = (room) => {
 const handleUpdate = async () => {
   try {
     await axios.put(
-      `https://xenonhostel.com/hotel/room/${selectedRoom.id}`,
+      `https://api.xenonhostel.com/hotel/room/${selectedRoom.id}`,
       formData
     );
 
