@@ -27,7 +27,7 @@ const RoomRegisterForm = ({updateMessage, changeRegister, room_id}) => {
     e.preventDefault();
     // if (!validateForm()) return;
     try {
-      const res = await fetch("https://api.xenonhostel.com/hotel/room", {
+      const res = await fetch("https://xenonhostel.com/hotel/room", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -45,6 +45,7 @@ const RoomRegisterForm = ({updateMessage, changeRegister, room_id}) => {
         currency: "",
         room_desc: "",
         branch_id: "",
+        room_num:"",
         shared:true
       });
     setShowHeader(false)
@@ -75,6 +76,18 @@ const RoomRegisterForm = ({updateMessage, changeRegister, room_id}) => {
             type="text"
             name="size"
             value={formData.size}
+            onChange={handleChange}
+            className="border p-2 w-full rounded"
+            required
+          />
+          {/* {errors.size && <p className="text-red-500 text-sm">{errors.size}</p>} */}
+        </div>
+        <div>
+          <label className="block font-semibold">Room Number</label>
+          <input
+            type="text"
+            name="room_num"
+            value={formData.room_num}
             onChange={handleChange}
             className="border p-2 w-full rounded"
             required

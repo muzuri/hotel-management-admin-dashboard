@@ -35,6 +35,7 @@ const RoomTable = ({updateMessage,bookedRom }) => {
       price:"",
       currency:"",
       room_desc:"",
+      room_num:"",
       branch_id:1
     });
     const [buttons] = useState([
@@ -69,7 +70,7 @@ const RoomTable = ({updateMessage,bookedRom }) => {
     // Fetch data when the component mounts
   useEffect(() => {
     // Define the URL of the API
-    const url = 'https://api.xenonhostel.com/hotel/room';
+    const url = 'https://xenonhostel.com/hotel/room';
     // Fetch data
     fetch(url)
       .then((response) => {
@@ -105,7 +106,7 @@ const RoomTable = ({updateMessage,bookedRom }) => {
     if (!roomId) return;
 
     try {
-      await fetch(`https://api.xenonhostel.com/hotel/room/${roomId}`, {
+      await fetch(`https://xenonhostel.com/hotel/room/${roomId}`, {
         method: "DELETE",
       });
 
@@ -126,7 +127,7 @@ const handleView = (room) => {
 const handleUpdate = async () => {
   try {
     await axios.put(
-      `https://api.xenonhostel.com/hotel/room/${selectedRoom.id}`,
+      `https://xenonhostel.com/hotel/room/${selectedRoom.id}`,
       formData
     );
 
@@ -153,6 +154,7 @@ const closeModal = () => {
       price:"",
       currency:"",
       room_desc:"",
+      room_num:"",
       branch_id:1
     }
   );
@@ -173,7 +175,8 @@ const openEditModal = (row) => {
       price:row.price,
       currency:row.currency,
       room_desc:row.room_desc,
-      branch_id:row.branch_id
+      branch_id:row.branch_id,
+      room_num:row.room_num
     }
   );
   setShowModal(true);
@@ -249,6 +252,9 @@ const handleClose= () => {
 					<thead>
 						<tr>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
+								Room id
+							</th>
+              <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
 								Room Number
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
@@ -278,6 +284,10 @@ const handleClose= () => {
 							>
 								<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
                     {room.id}
+									
+								</td>
+                <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
+                    {room.room_num}
 									
 								</td>
                 <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
@@ -314,6 +324,18 @@ const handleClose= () => {
           <div className="bg-gray-800 bg-opacity-50 bg-opacity-50 rounded-xl p-6 w-full max-w-md shadow-lg">
             <h3 className="text-lg font-bold mb-4">Edit Room</h3>
             <div className="space-y-4">
+            <div>
+                <label className="block mb-1 text-sm font-medium">Room Number</label>
+                <input
+                      type="text"
+                      name="room_num"
+                      value={formData.room_num}
+                      onChange={(e) =>
+                        setFormData({ ...formData, room_num: e.target.value })
+                      }
+                      className="border p-2 w-full rounded"
+                    />
+              </div>
               <div>
                 <label className="block mb-1 text-sm font-medium">Room Size</label>
                 <input
