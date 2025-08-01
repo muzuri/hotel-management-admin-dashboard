@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {motion} from 'framer-motion';
 
-const RoomRegisterForm = ({updateMessage, changeRegister, room_id}) => {
+const RoomRegisterForm = ({updateMessage}) => {
   const [showHeader, setShowHeader] = useState(true)
   const [formData, setFormData] = useState({
     // size: "200 m",

@@ -6,6 +6,15 @@ import AlertMessage from '../common/AlertMessage';
 import WarningMessage from '../common/WarningMessage';
 
 const AvailableBeds = ({updateMessage}) => {
+  const formatDate = (date) => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`;
+  };
+  const currentDate = new Date();
+  const nextDate = new Date();
+  nextDate.setDate(currentDate.getDate() + 2);
     const [data, setData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [checkinDate, setCheckinDate] = useState();
@@ -15,8 +24,8 @@ const AvailableBeds = ({updateMessage}) => {
     const [todayDate, setToday] = useState('');
     const [tomorrowDate, setTomorrow] = useState('');
     const [error, setError] = useState(null);
-    const [filterCheckin, setFilterCheckin] = useState("2025-10-15");
-    const [filterCheckout, setFilterCheckout] = useState("2025-10-16")
+    const [filterCheckin, setFilterCheckin] = useState(formatDate(currentDate));
+    const [filterCheckout, setFilterCheckout] = useState(formatDate(nextDate));
     const [bedDetails, setBedDetails ] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);

@@ -6,17 +6,29 @@ import AlertMessage from '../common/AlertMessage';
 import WarningMessage from '../common/WarningMessage';
 
 const BookedBeds = ({updateMessage}) => {
+  const formatDate = (date) => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`;
+  };
+  const currentDate = new Date();
+  const nextDate = new Date();
+  nextDate.setDate(currentDate.getDate() + 1);
+
     const [data, setData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [checkinDate, setCheckinDate] = useState();
     const [checkoutDate, setCheckoutDate] = useState();
     const [selectedRow, setSelectedRow] = useState(null);
     const [search, setSearch] = useState(null);
-    const [todayDate, setToday] = useState('');
-    const [tomorrowDate, setTomorrow] = useState('');
+    const [todayDate, setToday] = useState(null);
+    const [tomorrowDate, setTomorrow] = useState(null);
     const [error, setError] = useState(null);
-    const [filterCheckin, setFilterCheckin] = useState(null);
-    const [filterCheckout, setFilterCheckout] = useState(null)
+    // const [filterCheckin, setFilterCheckin] = useState(formatDate(currentDate));
+    // const [filterCheckout, setFilterCheckout] = useState(formatDate(nextDate));
+    const [filterCheckin, setFilterCheckin] = useState(formatDate(currentDate));
+    const [filterCheckout, setFilterCheckout] = useState(formatDate(nextDate))
     const [bedDetails, setBedDetails ] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -43,9 +55,16 @@ const BookedBeds = ({updateMessage}) => {
 // setCheckinDate(formatDate(todayDate));
 // setCheckoutDate(formatDate(tomorrowDate));
 //   }, [])
-    useEffect(() => {
 
-    // console.log(todayDate);
+
+// useEffect(() => {
+  
+
+//   setFilterCheckin(formatDate(currentDate));
+//   setFilterCheckout(formatDate(nextDate));
+// }, []);
+
+    useEffect(() => {
     // console.log(tomorrowDate)
         // Fetch data from API
         const  fetchData = async() => {
@@ -68,8 +87,7 @@ const BookedBeds = ({updateMessage}) => {
       const data = await response.json();
       const avai = availableBeds(data);
       console.log('------------ Booked are this ');
-      console.log(avai);
-      console.log(data)
+      console.log(availableBeds);
       setData(data);
       setFilteredData(data);
         }
@@ -88,6 +106,20 @@ const BookedBeds = ({updateMessage}) => {
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
+  const handleChangeStatus = async(bedId) => {
+    try{
+      await fetch(
+        `https://api.xenonhostel.com/hotel/bed/activate/${bedId}`,{
+          method:"POST"
+        });
+           // Update State After Deletion
+      setData(data.filter((item)=> item.id !== bedId))
+  
+    }
+    catch(error) {
+      console.error("Error in activating bed status:", error);
+    }
+    }
 
   const handleNext = () => {
     if (currentPage < totalPages) {
@@ -274,7 +306,7 @@ const BookedBeds = ({updateMessage}) => {
           )
            : (
             <tr>
-              <td colSpan="3" className="text-center p-4">{`Today is ${todayDate} and Tommorow is ${tomorrowDate} `}</td>
+              <td colSpan="3" className="text-center p-4">{`Today is ${filterCheckin} and Tommorow is ${filterCheckout} `}</td>
             </tr>
           )}
         </tbody>

@@ -10,8 +10,9 @@ const Buttons = ({label, disabled= false, onClick, icon, key}) => {
       whileTap={{ scale: 0.95 }}
       disabled={disabled}
       onClick={onClick}
-      className={`flex items-center gap-2 py-2 px-4 rounded-lg font-medium shadow-md transition-all
-        ${disabled ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-green-500 hover:bg-indigo-600 text-white"}`}
+      className={`flex items-center gap-2 py-2 px-4 rounded-lg font-medium shadow-md transition-colors duration-200 active:bg-blue-800
+        ${disabled ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-green-500 hover:bg-indigo-600 text-white"}`
+      }
     >
        {icon} 
       {label}

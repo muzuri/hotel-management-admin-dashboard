@@ -1,15 +1,15 @@
 import React from 'react'
 import { motion } from "framer-motion";
-import { Edit, Search, Trash2, Check, X } from "lucide-react";
+import { Edit, Search, Trash2, Check } from "lucide-react";
 import { IoAddCircle, IoBed } from "react-icons/io5"
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 
 import Buttons from '../common/Buttons';
 import LoadingRing from '../common/LoadingRing';
+import BackButton from '../common/BackButton';
 
-const BedsTable = ({updateMessage}) => {
+const BedsDeactivate = () => {
     const [isLoading, setIsLoading] = useState(true);
 	const [data, setData] = useState([]); // Store API data
 	const [search, setSearch] = useState(""); // Search input state
@@ -28,17 +28,10 @@ const BedsTable = ({updateMessage}) => {
 		magnitude:"",
 		bed_size_name:""
 	  });
-// 	const [viewStack, setViewStack] = useState(["ListBeds"]);
-//     const currentView = viewStack[viewStack.length-1];
-//     const goTo = (view) => setViewStack((prev) => [...prev, view]);
-//     const goBack = () => {
-//     if (viewStack.length > 1) {
-//       setViewStack((prev) => prev.slice(0, -1));
-//     }
-//   };
+  
 	useEffect(() => {
 	  // Fetch data from API
-	  const url = 'https://api.xenonhostel.com/hotel/bed'
+	  const url = 'https://api.xenonhostel.com/hotel/bedDeactivate'
 	  const fetchData = async () => {
 		try {
 		  const response = await fetch(url);
@@ -46,7 +39,6 @@ const BedsTable = ({updateMessage}) => {
 		  console.log(result);
 		  setData(result);
 		  setFilteredData(result); // Initialize filteredData with full data
-		  console.log("Beds status is" + result)
 		} catch (error) {
 		  console.error("Error fetching data:", error);
 		}
@@ -95,20 +87,6 @@ const BedsTable = ({updateMessage}) => {
       console.error("Error deleting item:", error);
     }
   };
-  const handleChangeStatus = async(bedId) => {
-	try{
-		await fetch(
-			`https://api.xenonhostel.com/hotel/bed/${bedId}`,{
-				method:"POST"
-			});
-			   // Update State After Deletion
-		setData(data.filter((item)=> item.id !== bedId))
-
-	}
-	catch(error) {
-		console.error("Error in activating bed status:", error);
-	}
-  }
   const handleUpdate = async () => {
 	try {
 	  await axios.put(
@@ -158,6 +136,21 @@ const BedsTable = ({updateMessage}) => {
 		if (isLoading) {
 		  return <LoadingRing></LoadingRing>
 		}
+        const handleChangeStatus = async(bedId) => {
+            try{
+                await fetch(
+                    `https://api.xenonhostel.com/hotel/bed/${bedId}`,{
+                        method:"POST"
+                    });
+                       // Update State After Deletion
+                setData(data.filter((item)=> item.id !== bedId))
+        
+            }
+            catch(error) {
+                console.error("Error in activating bed status:", error);
+            }
+          }
+        
 	  
 		// if (error) {
 		//   return <div>Error: {error}</div>;
@@ -168,8 +161,15 @@ const BedsTable = ({updateMessage}) => {
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ delay: 0.2 }}
-		>      
+		> 
+
+        
 			<div className='flex justify-between items-center mb-6'>
+            {/* <div className='flex gap-4 p-6'>
+                <Buttons key={1} label={'Add new Bed'} icon= {<IoAddCircle size={18}></IoAddCircle>} onClick={()=> updateMessage("assignBed")} ></Buttons>
+                <Buttons id={2} label={'Booked Bed'}  icon = {<IoBed size={18}></IoBed>}onClick={()=> updateMessage("bookedBed")} ></Buttons>
+                <Buttons id={3} label={'availableBed'} icon={<IoBed size={18}></IoBed>} onClick={()=> updateMessage("availableBed")} ></Buttons>
+            </div> */}
 				<div className='relative'>
 					<input
 						type='text'
@@ -182,7 +182,7 @@ const BedsTable = ({updateMessage}) => {
 					<Search className='absolute left-3 top-2.5 text-gray-400' size={18} />
 				</div>
 			</div>
-            <h2 className='text-xl font-semibold text-gray-100 text-center'>Active Beds in Hotel</h2>
+            <h2 className='text-xl font-semibold text-gray-100 text-center'>Deactive Beds in Hotel</h2>
 			<div className='overflow-x-auto'>
 				{showBedsTable && 
 				<table className='min-w-full divide-y divide-gray-700'>
@@ -265,8 +265,8 @@ const BedsTable = ({updateMessage}) => {
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.bed_size_name}</td>
                 <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bed.magnitude}</td>
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-				<button className='text-red-400 hover:text-red-300' onClick={() => handleChangeStatus(bed.id)}>
-						<X size={18} />
+                <button className='text-green-700 hover:text-red-300' onClick={() => handleChangeStatus(bed.id)}>
+						<Check size={18} />
 						
 					</button>
 					<button className='text-indigo-400 hover:text-indigo-300 mr-2' onClick={()=> openEditModal(bed)}>
@@ -416,4 +416,4 @@ const BedsTable = ({updateMessage}) => {
 	);
 }
 
-export default BedsTable
+export default BedsDeactivate

@@ -6,14 +6,24 @@ import StatCard from "../common/StatCard";
 import { Package,TrendingUp, AlertTriangle,DollarSign, EuroIcon } from 'lucide-react'
 
 const BookingsTable = () => {
+	const formatDate = (date) => {
+		const day = String(date.getDate()).padStart(2, '0');
+		const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+		const year = date.getFullYear();
+		return `${year}-${month}-${day}`;
+	  };
+	  const currentDate = new Date();
+	  const startingDate = new Date();
+	  
+	  startingDate.setDate(currentDate.getDate() -5);
 	const [isLoading, setIsLoading] = useState(true);
 	
 	const [data, setData] = useState([]); // Store API data
 	const [search, setSearch] = useState(""); // Search input state
 	const [reference, setReference] = useState("");
 	const [filteredData, setFilteredData] = useState([]); // Store filtered data
-	const [startDate, setStartDate] = useState("");
-	const [endDate, setEndDate] = useState("");
+	const [startDate, setStartDate] = useState(formatDate(startingDate));
+	const [endDate, setEndDate] = useState(formatDate(currentDate));
 	const [totalAmount, setTotalAmount] = useState(0);
 	const [totalBooking, setTotalBooking] = useState(0);
   
