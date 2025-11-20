@@ -18,10 +18,20 @@ const AssignRoomBeds = () => {
     const [selectedId, setSelectedId] = useState(null);
 
     useEffect(() => {
+        const token = sessionStorage.getItem("token");
+        if (!token) {
+            setError("No token found");
+            return;
+        }
         // Define the URL of the API
-        const url = 'https://api.xenonhostel.com/hotel/room';
+        const url = `${import.meta.env.VITE_API_BASE_URL}/hotel/room`;
         // Fetch data
-        fetch(url)
+        fetch(url, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${JSON.parse(token)}`,
+                "Content-Type": "application/json"
+            }})
           .then((response) => {
             if (!response.ok) {
               throw new Error('Network response was not ok');

@@ -69,10 +69,22 @@ const RoomTable = ({updateMessage,bookedRom }) => {
     ]);
     // Fetch data when the component mounts
   useEffect(() => {
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+        setError("No token found");
+        return;
+    }
+    console.log('------>', token)
     // Define the URL of the API
-    const url = 'https://api.xenonhostel.com/hotel/room';
+    const url = `${import.meta.env.VITE_API_BASE_URL}/hotel/room`;
     // Fetch data
-    fetch(url)
+    fetch(url, {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${JSON.parse(token)}`,
+              "Content-Type": "application/json",  // if you're sending JSON
+              "Accept": "application/json"
+          }})
       .then((response) => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -94,7 +106,6 @@ const RoomTable = ({updateMessage,bookedRom }) => {
     setSearchTerm(term);
     const filtered = rooms.filter(
         (room) => room.room_category.toLowerCase().includes(term) || room.room_desc.toLowerCase().includes(term)
-
     );
     setRoom(filtered);
     setLoading(false)
@@ -106,8 +117,14 @@ const RoomTable = ({updateMessage,bookedRom }) => {
     if (!roomId) return;
 
     try {
-      await fetch(`https://api.xenonhostel.com/hotel/room/${roomId}`, {
+      const token = sessionStorage.getItem('token');
+      if(!token) return;
+      await fetch(`${import.meta.env.VITE_API_BASE_URL}/hotel/room/${roomId}`, {
         method: "DELETE",
+				headers: {
+					"Authorization": `Bearer ${JSON.parse(token)}`,
+					"Content-Type": "application/json",  // if you're sending JSON
+				}
       });
 
       // Update State After Deletion
@@ -126,8 +143,14 @@ const handleView = (room) => {
 
 const handleUpdate = async () => {
   try {
+    const token = sessionStorage.getItem('token')
+    if(!token) return;
     await axios.put(
-      `https://api.xenonhostel.com/hotel/room/${selectedRoom.id}`,
+      `${import.meta.env.VITE_API_BASE_URL}/hotel/room/${selectedRoom.id}`,{
+        headers: {
+					Authorization: `Bearer ${JSON.parse(token)}`
+				}
+      },
       formData
     );
 
@@ -269,14 +292,13 @@ const handleClose= () => {
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
 								Actions
 							</th>
-                            
 						</tr>
 					</thead>
 
 					<tbody className='divide divide-gray-700'>
 						{rooms.map((room) => (
 							<motion.tr
-              className=' hover:bg-amber-950'
+              // className='hover:bg-amber-950'
 								key={room.id}
 								initial={{ opacity: 0 }}
 								animate={{ opacity: 1 }}
@@ -302,16 +324,16 @@ const handleClose= () => {
                     {room.number_bed}
 							
 								</td>
-								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>                 
+								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
                   <button
                     onClick={() => openEditModal(room)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded"
+                    className="bg-blue-500 text-white px-3 mr-4 py-1 rounded"
                   >
                     Edit
                   </button>
-                  <button className='text-red-400 hover:text-red-300 mr-4' 
+                  <button className='bg-amber-500 text-blue-700 hover:text-cyan-700  px-3 py-1 rounded' onClick={()=> handleView(room)}>View</button>
+                  <button className='text-red-500 hover:text-red-300 mr-4 px-3 py-1 rounded'
                   onClick={() => handleDelete(room.id)}>Delete</button>
-                  <button className='bg-amber-300 text-blue-700 hover:text-cyan-700' onClick={()=> handleView(room)}>View</button>
 								</td>
 							</motion.tr>
 						))}

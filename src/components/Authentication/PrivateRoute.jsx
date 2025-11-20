@@ -1,10 +1,11 @@
+import { useContext } from 'react';
 import { Navigate } from "react-router-dom";
-import { useAuth }  from "../../context/AuthContext";
+import { AuthContext }  from "../../context/AuthContext";
 import * as jwt_decode from 'jwt-decode';
 
 
 const PrivateRoute = ({ children }) => {
-  const { token } = useAuth();
+  const { token } = useContext(AuthContext);
   
 //   const isTokenValid = () => {
 //     if (!token) return false;
@@ -21,7 +22,7 @@ const PrivateRoute = ({ children }) => {
 
 //   }
   if (!token) {
-    return <Navigate to="/login" replace />;
+    return null;
   }
 
   return children;

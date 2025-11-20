@@ -10,12 +10,20 @@ const Api = () => {
     const [error, setError] = useState(null);
     // Fetch data when the component mounts
   useEffect(() => {
+	const token = sessionStorage.getItem('token');
+	if(!token) return;
     // Define the URL of the API
-    const url = 'http://localhost:8080/hotel/room'
-
+    const url = `${import.meta.env.VITE_API_BASE_URL}/hotel/room`
     // Fetch data
-    fetch(url)
-      .then((response) => {
+    fetch(url,
+		{
+			method: "GET",
+			headers: {
+				"Authorization": `Bearer ${JSON.parse(token)}`,
+				"Content-Type": "application/json",  // if you're sending JSON
+			}
+		}
+	).then((response) => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }

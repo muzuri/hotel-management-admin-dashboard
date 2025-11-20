@@ -28,7 +28,7 @@ const Registration = () => {
     
 const onSubmit = async (data) =>{
     try{
-        const response = await axios.post('https://api.xenonhostel.com/api/hotel/public/register', data);
+        const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/hotel/public/register`, data);
         console.log('Login success:', response.data);
     }
     catch(error ){
@@ -76,7 +76,7 @@ const onSubmit = async (data) =>{
 // "created_by":"Aima",
 // "updated_by":"Akaliza"
  }
-       <div className='input wrapper flex flex-col'>
+<div className='input wrapper flex flex-col'>
 <select
   {...register("marital_status", { required: true })}
   className="w-full p-2 border border-gray-300 rounded"

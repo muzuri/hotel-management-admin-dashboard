@@ -29,10 +29,18 @@ const BookingsTable = () => {
   
 	useEffect(() => {
 		// Fetch data from API
-		const url = 'https://api.xenonhostel.com/hotel/booking'
+		const token = sessionStorage.getItem('token');
+		if(!token) return;
+		const url = `${import.meta.env.VITE_API_BASE_URL}/hotel/booking`
 		const fetchData = async () => {
 		  try {
-			const response = await fetch(url);
+			const response = await fetch(url,{
+				method: "GET",
+				headers: {
+					"Authorization": `Bearer ${JSON.parse(token)}`,
+					"Content-Type": "application/json",  // if you're sending JSON
+				}
+			});
 			const result = await response.json();
 			setData(result);
 			setFilteredData(result); // Initialize filteredData with full data

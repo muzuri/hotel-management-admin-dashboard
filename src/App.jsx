@@ -8,9 +8,10 @@ import AnalyticsPage from './pages/AnalyticsPage'
 import SettingsPage from './pages/SettingsPage'
 import BookingsPage from './pages/BookingsPage'
 import RoomPage from './pages/RoomPage'
+import ProtectedRoute from './components/Authentication/ProtectedRoute'
 import BedsPage from './pages/BedsPage'
-import { AuthProvider } from './context/AuthContext';
-import LoginPage from './pages/LoginPage';
+import PaymentPage from './pages/PaymentPage'
+import { AuthProvider } from './context/AuthProvider';
 import PrivateRoute from './components/Authentication/PrivateRoute'
 import RegistrationPage from './pages/RegistrationPage'
 
@@ -24,34 +25,24 @@ function App() {
         <div className='absolute inset-0 backdrop-blur-sm'></div>
       </div>
       <AuthProvider>
-      <Sidebar></Sidebar>
-      <Routes>
-        <Route path='/login' element={<LoginPage></LoginPage>}></Route>
-        <Route path='/registration' element={<RegistrationPage></RegistrationPage>}></Route>
-        <Route path='/' element={<BookingsPage></BookingsPage>}> </Route>
-        <Route path='/bookings' element={<BookingsPage></BookingsPage>}></Route>
-        <Route path='/users' element={<UsersPage></UsersPage>}></Route>
-        <Route path='/sales' element={<SalesPage></SalesPage>}></Route>
-        <Route path='/orders' element=
-        {<PrivateRoute>
-         <OrdersPage></OrdersPage>
+        <PrivateRoute>
+          <Sidebar/>
         </PrivateRoute>
-        }
-        ></Route>
-          
-        <Route path='/analytics' element={<AnalyticsPage></AnalyticsPage>}></Route>
-        <Route path='/settings' element={<SettingsPage></SettingsPage>}></Route>
-        <Route path='/rooms' element={<RoomPage></RoomPage>}></Route>
-        <Route path='/beds' element={<BedsPage></BedsPage>}></Route>
-      </Routes>
-      
+        <Routes>
+          <Route path='/registration' element={<ProtectedRoute><RegistrationPage/></ProtectedRoute>}></Route>
+          <Route path='/' element={<ProtectedRoute><BookingsPage/></ProtectedRoute>}></Route>
+          <Route path='/bookings' element={<ProtectedRoute><BookingsPage/></ProtectedRoute>}></Route>
+          <Route path='/users' element={<ProtectedRoute><UsersPage/></ProtectedRoute>}></Route>
+          <Route path='/sales' element={<ProtectedRoute><SalesPage/></ProtectedRoute>}></Route>
+          <Route path='/orders' element={<ProtectedRoute><OrdersPage/></ProtectedRoute>} ></Route>
+          <Route path='/payments' element={<ProtectedRoute><PaymentPage/></ProtectedRoute>} ></Route>
+          <Route path='/analytics' element={<ProtectedRoute><AnalyticsPage/></ProtectedRoute>}></Route>
+          <Route path='/settings' element={<ProtectedRoute><SettingsPage/></ProtectedRoute>}></Route>
+          <Route path='/rooms' element={<ProtectedRoute><RoomPage/></ProtectedRoute>}></Route>
+          <Route path='/beds' element={<ProtectedRoute><BedsPage/></ProtectedRoute>}></Route>
+        </Routes>
       </AuthProvider>
     </div>
-    
-    
-    
-    
-
   )
 }
 
