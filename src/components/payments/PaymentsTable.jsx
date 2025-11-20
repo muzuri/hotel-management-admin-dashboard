@@ -69,7 +69,7 @@ const PaymentsTable = ({updateMessage}) => {
 	useEffect(() => {
 	  // Filter data based on search input
 	  const filtered = data.filter((item) =>
-		item.currency.toLowerCase().includes(search.toLowerCase())
+		item.booking_id.toLowerCase().includes(search.toLowerCase())
 	  );
 	  setFilteredData(filtered);
 	}, [search, data]);
@@ -206,7 +206,7 @@ const PaymentsTable = ({updateMessage}) => {
 				<div className='relative'>
 					<input
 						type='text'
-						placeholder='Search Room...'
+						placeholder='Search Booking ID...'
 						className='bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
@@ -221,7 +221,7 @@ const PaymentsTable = ({updateMessage}) => {
 					<thead>
 						<tr>
                         	<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>Payment Id</th>
-        
+                        	<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>Booking Id</th>        
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Exchange rate
 							</th>
@@ -265,6 +265,9 @@ const PaymentsTable = ({updateMessage}) => {
 							transition={{ duration: 0.3 }}>
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 								{payment.id}
+							</td>
+							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+								{payment.booking_id}
 							</td>
 							{/* <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100 flex gap-2 items-center'>
 								<img
