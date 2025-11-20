@@ -137,14 +137,15 @@ const PaymentsTable = ({updateMessage}) => {
 			const token = sessionStorage.getItem('token');
 			if(!token) return;
 			await axios.put(
-			`${import.meta.env.VITE_API_BASE_URL}/hotel/payment/${selectedPayment.id}`,{
-				headers: {
-					Authorization: `Bearer ${JSON.parse(token)}`
-				}
-			},
+			`${import.meta.env.VITE_API_BASE_URL}/hotel/payment/${selectedPayment.id}`,
 			{
-				payment_method: payment_method === 'OTHER' ? other : payment_method,
-				payment_status: "SUC",
+				"payment_method": payment_method === "OTHER" ? other : payment_method,
+				"payment_status": "SUC"
+			},{
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${JSON.parse(token)}`
+				}
 			}
 		);
 	
@@ -280,7 +281,8 @@ const PaymentsTable = ({updateMessage}) => {
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.amount}</td>
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.payment_method}</td>
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.tax}</td>
-							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.payment_status}</td>
+							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.payment_status ==='SUC' ? "Success":
+							payment.payment_status ==='ENT' ? "Initiated" : payment.payment_status ==='PEN' ? "Pending" : "Requested"}</td>
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 							<button className='text-red-400 hover:text-red-300' onClick={() => handleChangeStatus(payment.id)}>
 									<X size={18} />
