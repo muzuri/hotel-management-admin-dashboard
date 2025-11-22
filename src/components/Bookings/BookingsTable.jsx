@@ -46,16 +46,13 @@ const BookingsTable = () => {
 			setFilteredData(result); // Initialize filteredData with full data
 			console.log('filtered data ....')
 		    console.log(filteredData);
+			totalRevenue(result);
+			setTotalBooking(result.length);
 		  } catch (error) {
 			console.error("Error fetching data:", error);
 		  }
 		};
 		fetchData();
-		totalRevenue(filteredData);
-		console.log('total revenue ........')
-		console.log(totalRevenue)
-		setTotalBooking(filteredData.length)
-		
 	  }, []);
 	useEffect(() => {
 	  // Filter data based on search input
@@ -64,7 +61,7 @@ const BookingsTable = () => {
 	  );
 	  setFilteredData(filtered);
 	  totalRevenue(filtered)
-	  setTotalBooking(filteredData.length)
+	  setTotalBooking(filtered.length)
 	}, [reference, data]);
 	useEffect(()=> {
 		const filtered = data.filter((item) => {
@@ -76,8 +73,8 @@ const BookingsTable = () => {
 		  });
 	  
 		  setFilteredData(filtered);
-		  totalRevenue(filteredData)
-		  setTotalBooking(filteredData.length)
+		  totalRevenue(filtered)
+		  setTotalBooking(filtered.length)
 	},[startDate, endDate, data])
 
 	const downloadBooking = (data) => {
@@ -99,14 +96,14 @@ const BookingsTable = () => {
 		XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 		XLSX.writeFile(workbook, "table_data.xlsx");
 	}
-	const totalRevenue = (data) =>{
-		const total = data.reduce((sum, item)=> sum + 0, 0);
-		setTotalAmount(total.toFixed(2));
-	}
-	// const totalRevenue = (data) =>{
-	// 	const total = data.reduce((sum, item)=> sum + item.payment.amount, 0);
-	// 	setTotalAmount(total.toFixed(2));
-	// }
+    const totalRevenue = (bookings) =>{
+        // Sum booking.payment.amount for each booking (defensive parsing)
+        const total = (bookings || []).reduce((sum, item) => {
+            const amt = item && item.payment && item.payment.amount ? Number(item.payment.amount) : 0;
+            return sum + (Number.isFinite(amt) ? amt : 0);
+        }, 0);
+        setTotalAmount(total.toFixed(2));
+    }
 
 	return (
 		<motion.div
