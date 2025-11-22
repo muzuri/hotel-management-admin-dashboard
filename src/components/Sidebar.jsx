@@ -1,5 +1,5 @@
 
-import { BarChart2, DollarSign, Menu, Settings, ShoppingBag, ShoppingCart, TrendingUp, Users, BookImageIcon, HomeIcon, BedIcon } from 'lucide-react'
+import { BarChart2, DollarSign, Menu, Settings, ShoppingBag, ShoppingCart, TrendingUp, Users, BookImageIcon, HomeIcon, BedIcon, LogOut } from 'lucide-react'
 import { FaHome, FaUser, FaCog, FaChevronDown, FaChevronRight } from "react-icons/fa";
 import { MdMeetingRoom } from "react-icons/md";
 import React, { useState, useContext } from 'react'
@@ -34,7 +34,7 @@ const SIDEBAR_ITEMS = [
     name:"Settings", icon: Settings, color:"#6366f1", href:'/settings'
 },
 {
-    name:"Logout", icon: Settings, color:"#6366f1", href:'/logout'
+    name:"Logout", icon: LogOut, color:"#6366f1", href:'/logout'
 }
 // {
 //     name: "User Settings",

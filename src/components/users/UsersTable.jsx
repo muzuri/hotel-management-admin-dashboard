@@ -1,23 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
-
-const userData = [
-	{ id: 1, name: "John Doe", email: "john@example.com", role: "Customer", status: "Active" },
-	// { id: 2, name: "Jane Smith", email: "jane@example.com", role: "Admin", status: "Active" },
-	// { id: 3, name: "Bob Johnson", email: "bob@example.com", role: "Customer", status: "Inactive" },
-	// { id: 4, name: "Alice Brown", email: "alice@example.com", role: "Customer", status: "Active" },
-	// { id: 5, name: "Charlie Wilson", email: "charlie@example.com", role: "Moderator", status: "Active" },
-];
+import LoadingRing from '../common/LoadingRing';
 
 const UsersTable = () => {
 	const [searchTerm, setSearchTerm] = useState("");
-	const [filteredUsers, setFilteredUsers] = useState(userData);
-
+	const [filteredUsers, setFilteredUsers] = useState([]);
+	const [isLoading, setIsLoading] = useState(true);
 	const handleSearch = (e) => {
 		const term = e.target.value.toLowerCase();
 		setSearchTerm(term);
-		const filtered = userData.filter(
+		const filtered = filteredUsers.filter(
 			(user) => user.name.toLowerCase().includes(term) || user.email.toLowerCase().includes(term)
 		);
 		setFilteredUsers(filtered);
@@ -25,7 +18,37 @@ const UsersTable = () => {
     const clickEdit=()=>{
         console.log("Edit Button Clicked")
     }
+	useEffect(() => {
+	  // Fetch data from API
+	  fetchData();
+	}, []);
+	const fetchData = async () => {
+		const url = `${import.meta.env.VITE_API_BASE_URL}/hotel/user`
+		try {
+			const token = sessionStorage.getItem('token');
+			if(!token) return;
+			const response = await fetch(url, {
+				method: "GET",
+				headers: {
+					"Authorization": `Bearer ${JSON.parse(token)}`,
+					"Content-Type": "application/json",  // if you're sending JSON
+				}
+			});
+			const result = await response.json();
+			console.log(result);
+			setFilteredUsers(result); // Initialize filteredData with full data
+			console.log("Payments status is" + result)
+			setIsLoading(false)
+		} catch (error) {
+			console.error("Error fetching data:", error);
+			setIsLoading(false)
+		}
+	};
 
+// Render loading, error, or data depending on the state
+	if (isLoading) {
+		return <LoadingRing/>
+	}
 	return (
 		<motion.div
 			className='bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700'
@@ -81,7 +104,7 @@ const UsersTable = () => {
 									<div className='flex items-center'>
 										<div className='flex-shrink-0 h-10 w-10'>
 											<div className='h-10 w-10 rounded-full bg-gradient-to-r from-purple-400 to-blue-500 flex items-center justify-center text-white font-semibold'>
-												{user.name.charAt(0)}
+												{user.first_name.charAt(0)}
 											</div>
 										</div>
 										<div className='ml-4'>
@@ -102,7 +125,7 @@ const UsersTable = () => {
 								<td className='px-6 py-4 whitespace-nowrap'>
 									<span
 										className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-											user.status === "Active"
+											user.status === "ACTIVE"
 												? "bg-green-800 text-green-100"
 												: "bg-red-800 text-red-100"
 										}`}

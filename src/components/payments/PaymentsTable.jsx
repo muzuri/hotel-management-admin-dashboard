@@ -41,8 +41,10 @@ const PaymentsTable = ({updateMessage}) => {
 //   };
 	useEffect(() => {
 	  // Fetch data from API
-	  const url = `${import.meta.env.VITE_API_BASE_URL}/hotel/payment`
-	  const fetchData = async () => {
+	  fetchData();
+	}, []);
+	const fetchData = async () => {
+		const url = `${import.meta.env.VITE_API_BASE_URL}/hotel/payment`
 		try {
 			const token = sessionStorage.getItem('token');
 			if(!token) return;
@@ -58,14 +60,12 @@ const PaymentsTable = ({updateMessage}) => {
 			setData(result);
 			setFilteredData(result); // Initialize filteredData with full data
 			console.log("Payments status is" + result)
+			setIsLoading(false)
 		} catch (error) {
-		  console.error("Error fetching data:", error);
+			console.error("Error fetching data:", error);
+			setIsLoading(false)
 		}
-	  };
-	  fetchData();
-	  setIsLoading(false)
-	}, []);
-  
+	};
 	useEffect(() => {
 	  // Filter data based on search input
 	  const filtered = data.filter((item) =>
@@ -134,28 +134,26 @@ const PaymentsTable = ({updateMessage}) => {
   }
 	const handleUpdate = async () => {
 		try {
+			const user = sessionStorage.getItem('user');
 			const token = sessionStorage.getItem('token');
 			if(!token) return;
 			await axios.put(
-			`${import.meta.env.VITE_API_BASE_URL}/hotel/payment/${selectedPayment.id}`,
-			{
-				"payment_method": payment_method === "OTHER" ? other : payment_method,
-				"payment_status": "SUC"
-			},{
-				headers: {
-					"Content-Type": "application/json",
-					"Authorization": `Bearer ${JSON.parse(token)}`
+				`${import.meta.env.VITE_API_BASE_URL}/hotel/payment/${selectedPayment.id}`,
+				{
+					"payment_method": payment_method === "OTHER" ? other : payment_method,
+					"payment_status": "SUC",
+					"updated_by": JSON.parse(user).first_name + ' ' + JSON.parse(user).last_name,
+					"received_by": JSON.parse(user).first_name + ' ' + JSON.parse(user).last_name
+				},{
+					headers: {
+						"Content-Type": "application/json",
+						"Authorization": `Bearer ${JSON.parse(token)}`
+					}
 				}
-			}
-		);
+			);
 	
-		const newData = filteredData.map((u) =>
-			u.id === selectedPayment.id ? { ...u, ...formData } : u
-		);
-		//   console.log("new data are the following:")
-		//   console.log(newData);
-		setData(newData);
-		closeModal();
+			fetchData();
+			closeModal();
 		} catch (err) {
 		console.error("Update error:", err);
 		}
@@ -284,8 +282,24 @@ const PaymentsTable = ({updateMessage}) => {
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.amount}</td>
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.payment_method}</td>
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.tax}</td>
-							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.payment_status ==='SUC' ? "Success":
-							payment.payment_status ==='ENT' ? "Initiated" : payment.payment_status ==='PEN' ? "Pending" : "Requested"}</td>
+							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+								<span
+										className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+											payment.payment_status ==='ENT'
+												? "bg-neutral-600 text-green-100" : payment.payment_status ==='SUC'
+												? "bg-green-800 text-green-100" : payment.payment_status ==='FAL'
+												? "bg-red-800 text-red-100" : "bg-amber-500 text-amber-50"
+										}`}
+									>
+								{payment.payment_status ==='SUC' ? "Success":
+									payment.payment_status ==='ENT' ? "Initiated" : 
+									payment.payment_status ==='PEN' ? "Pending" : 
+									payment.payment_status ==='FAL' ? "Failed": 
+									payment.payment_status ==='REQ' ? "Requested":
+									payment.payment_status  ==='CRE' ? "Created" :
+									payment.payment_status }
+							</span>
+							</td>
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 							<button className='text-red-400 hover:text-red-300' onClick={() => handleChangeStatus(payment.id)}>
 									<X size={18} />

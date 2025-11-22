@@ -11,6 +11,7 @@ import RoomPage from './pages/RoomPage'
 import ProtectedRoute from './components/Authentication/ProtectedRoute'
 import BedsPage from './pages/BedsPage'
 import PaymentPage from './pages/PaymentPage'
+import LogoutPage from './pages/LogoutPage'
 import { AuthProvider } from './context/AuthProvider';
 import PrivateRoute from './components/Authentication/PrivateRoute'
 import RegistrationPage from './pages/RegistrationPage'
@@ -40,6 +41,7 @@ function App() {
           <Route path='/settings' element={<ProtectedRoute><SettingsPage/></ProtectedRoute>}></Route>
           <Route path='/rooms' element={<ProtectedRoute><RoomPage/></ProtectedRoute>}></Route>
           <Route path='/beds' element={<ProtectedRoute><BedsPage/></ProtectedRoute>}></Route>
+          <Route path='/logout' element={<ProtectedRoute><LogoutPage/></ProtectedRoute>}></Route>
         </Routes>
       </AuthProvider>
     </div>
