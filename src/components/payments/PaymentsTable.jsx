@@ -14,6 +14,7 @@ const PaymentsTable = ({updateMessage}) => {
 	const [data, setData] = useState([]); // Store API data
 	const [search, setSearch] = useState(""); // Search input state
 	const [payment_method, setPaymentMethod] = useState(""); // Search input state
+	const [amount, setAmount] = useState(""); // Search input state
 	const [other, setOther] = useState(""); // Search input state
 	const [filteredData, setFilteredData] = useState([]); // Store filtered data
 	const [selectedRow, setSelectedRow] = useState(null);
@@ -133,25 +134,33 @@ const PaymentsTable = ({updateMessage}) => {
 	}
   }
 	const handleUpdate = async () => {
+		console.log(amount)
+		console.log(import.meta.env.VITE_API_TAX)
+		console.log(amount * Number(import.meta.env.VITE_API_TAX)/100)
 		try {
 			const user = sessionStorage.getItem('user');
 			const token = sessionStorage.getItem('token');
 			if(!token) return;
-			await axios.put(
-				`${import.meta.env.VITE_API_BASE_URL}/hotel/payment/${selectedPayment.id}`,
-				{
-					"payment_method": payment_method === "OTHER" ? other : payment_method,
-					"payment_status": "SUC",
-					"updated_by": JSON.parse(user).first_name + ' ' + JSON.parse(user).last_name,
-					"received_by": JSON.parse(user).first_name + ' ' + JSON.parse(user).last_name
-				},{
-					headers: {
-						"Content-Type": "application/json",
-						"Authorization": `Bearer ${JSON.parse(token)}`
+			if(payment_method){
+				await axios.put(
+					`${import.meta.env.VITE_API_BASE_URL}/hotel/payment/${selectedPayment.id}`,
+					{
+						"payment_method": payment_method === "OTHER" ? other : payment_method,
+						"payment_status": "SUC",
+						"amount": amount,
+						"tax": amount * Number(import.meta.env.VITE_API_TAX)/100,
+						"updated_by": JSON.parse(user).first_name + ' ' + JSON.parse(user).last_name,
+						"received_by": JSON.parse(user).first_name + ' ' + JSON.parse(user).last_name
+					},{
+						headers: {
+							"Content-Type": "application/json",
+							"Authorization": `Bearer ${JSON.parse(token)}`
+						}
 					}
-				}
-			);
-	
+				);
+			}else{
+				console.log('Add payment method')
+			}
 			fetchData();
 			closeModal();
 		} catch (err) {
@@ -161,6 +170,7 @@ const PaymentsTable = ({updateMessage}) => {
 	const openEditModal = (row) => {
 		setSelectedPayment(row);
 		console.log(row);
+		setAmount(row.amount)
 		setFormData(
 		  {
 		amount: row.amount,
@@ -239,10 +249,13 @@ const PaymentsTable = ({updateMessage}) => {
 								Amount
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								payment method
-							</th>
-                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								tax
+							</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								Total Amount
+							</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								payment method
 							</th>
                             <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Number of Person
@@ -280,8 +293,9 @@ const PaymentsTable = ({updateMessage}) => {
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.payment_fee}</td>
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.currency}</td>
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.amount}</td>
-							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.payment_method}</td>
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.tax}</td>
+							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.tax + payment.amount}</td>
+							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.payment_method}</td>
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 								<span
 										className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -343,9 +357,9 @@ const PaymentsTable = ({updateMessage}) => {
                 <input
 					type="text"
 					name="bed_num"
-					value={formData.amount}
+					value={amount}
 					onChange={(e) =>
-						setFormData({ ...formData, bed_num: e.target.value })
+						setAmount(e.target.value)
 					}
 					className="border p-2 w-full rounded"
                     />

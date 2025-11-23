@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Edit, Search, Trash2 } from "lucide-react";
+import { Edit, Search, Trash2, View } from "lucide-react";
 import { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 import StatCard from "../common/StatCard";
@@ -173,21 +173,21 @@ const BookingsTable = () => {
 						<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 							    #
 							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+							{/* <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Bed ID
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Room ID
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+							</th> */}
+							{/* <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Booking ID
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+							</th> */}
+							{/* <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Checkin Date
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Checkout Date
-							</th>
+							</th> */}
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Reference ID
 							</th>
@@ -210,13 +210,16 @@ const BookingsTable = () => {
 								Currency
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								ID
+								Payment ID
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Booked By
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Booking Date
+							</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								Actions
 							</th>
 						</tr>
 					</thead>
@@ -225,61 +228,32 @@ const BookingsTable = () => {
 					
           {filteredData.length > 0 ? (
            filteredData.map((booking, bookingId) =>
-			booking.booked_beds.map((bed, bedId)=>
+			// booking.booked_beds.map((bed, bedId)=>
 			(
-			<motion.tr
-				key={bookingId}
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				transition={{ duration: 0.3 }}
-			>
-				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bookingId+1}</td>
-				{bedId === 0 && (
-                  <>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-                      {bed.bed_id}
-                    </td>
+				<motion.tr
+					key={bookingId}
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					transition={{ duration: 0.3 }}>
+
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bookingId+1}</td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.reference}</td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100 flex gap-2 items-center'>{booking.booking_name}</td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.customer_id}</td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.amount :'not yet payed'}</td> 
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.payment_method:'not payed'}</td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.payment_status:'no pay method'}</td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.currency:'no currency'}</td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.id:'no pay id'}</td> 
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.booked_by}</td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.booking_date}</td>
 					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-                      {bed.room_id}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-                      {bed.booking_id}
-                    </td>
-					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-                      {bed.checking_in_date}
-                    </td>
-					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-                      {bed.checking_out_date}
-                    </td>
-                  </>
-                )}
-				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-					{booking.reference}
-				</td>
-				<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100 flex gap-2 items-center'>
-					{booking.booking_name}
-				</td>
-				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-					{booking.customer_id}
-				</td>
-			
-	 <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.amount :'not yet payed'}</td> 
-	<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.payment_method:'not payed'}</td>
-	<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment? booking.payment.payment_status:'no pay method'}</td>
-	<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment? booking.payment.currency:'no currency'}</td>
-	<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment? booking.payment.payment_id:'no pay id'}</td> 
-	<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.booked_by}</td>
-	<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.booking_date}</td>
-	{/* <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-					<button className='text-indigo-400 hover:text-indigo-300 mr-2'>
-						<Edit size={18} />
-					</button>
-					<button className='text-red-400 hover:text-red-300'>
-						<Trash2 size={18} />
-					</button>
-				</td> */}
-			</motion.tr>
-		)))
+						<button className='text-red-400 hover:text-red-300'>
+							<View className='text-indigo-400 hover:text-indigo-300 mr-2' size={18} />
+						</button>
+					</td>
+				</motion.tr>
+			))
           ) : (
             <tr>
               <td colSpan="3" className="text-center p-4">No data found</td>
