@@ -3,8 +3,8 @@ import { Edit, Search, Trash2, View, TextIcon, FileDownIcon } from "lucide-react
 import { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 import StatCard from "../common/StatCard";
-import jsPDF from "jspdf";
-import autoTable from 'jspdf-autotable';
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import { Package,TrendingUp, AlertTriangle,DollarSign, EuroIcon } from 'lucide-react'
 
 const BookingsTable = () => {
