@@ -12,6 +12,7 @@ import ProtectedRoute from './components/Authentication/ProtectedRoute'
 import BedsPage from './pages/BedsPage'
 import PaymentPage from './pages/PaymentPage'
 import LogoutPage from './pages/LogoutPage'
+import InvoicesPage from './pages/InvoicesPage'
 import { AuthProvider } from './context/AuthProvider';
 import PrivateRoute from './components/Authentication/PrivateRoute'
 import RegistrationPage from './pages/RegistrationPage'
@@ -37,6 +38,7 @@ function App() {
           <Route path='/sales' element={<ProtectedRoute><SalesPage/></ProtectedRoute>}></Route>
           <Route path='/orders' element={<ProtectedRoute><OrdersPage/></ProtectedRoute>} ></Route>
           <Route path='/payments' element={<ProtectedRoute><PaymentPage/></ProtectedRoute>} ></Route>
+          <Route path='/invoices' element={<ProtectedRoute><InvoicesPage/></ProtectedRoute>} ></Route>
           <Route path='/analytics' element={<ProtectedRoute><AnalyticsPage/></ProtectedRoute>}></Route>
           <Route path='/settings' element={<ProtectedRoute><SettingsPage/></ProtectedRoute>}></Route>
           <Route path='/rooms' element={<ProtectedRoute><RoomPage/></ProtectedRoute>}></Route>

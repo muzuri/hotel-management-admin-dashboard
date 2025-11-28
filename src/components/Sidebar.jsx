@@ -28,6 +28,9 @@ const SIDEBAR_ITEMS = [
     name:"Payments", icon: ShoppingCart, color:"#6366f1", href:'/payments'
 },
 {
+    name:"Invoices", icon: ShoppingCart, color:"#6366f1", href:'/invoices'
+},
+{
     name:"Analytics", icon: TrendingUp, color:"#6366f1", href:'analytics'
 },
 {

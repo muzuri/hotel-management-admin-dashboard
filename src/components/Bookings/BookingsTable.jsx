@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
-import { Edit, Search, Trash2, View } from "lucide-react";
+import { Edit, Search, Trash2, View, TextIcon, FileDownIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 import StatCard from "../common/StatCard";
+import jsPDF from "jspdf";
+import autoTable from 'jspdf-autotable';
 import { Package,TrendingUp, AlertTriangle,DollarSign, EuroIcon } from 'lucide-react'
 
 const BookingsTable = () => {
@@ -96,6 +98,151 @@ const BookingsTable = () => {
 		XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 		XLSX.writeFile(workbook, "table_data.xlsx");
 	}
+
+
+// ...existing code...
+const generateInvoice = async (booking) => {
+  if (!booking) return;
+
+  // helper - fetch image and convert to data URL
+  const loadImageAsDataUrl = async (url) => {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Logo fetch failed");
+    const blob = await res.blob();
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  // try to load JPEG logo (defaults to /logo.jpg)
+  const logoPath = (import.meta && import.meta.env && import.meta.env.VITE_LOGO_PATH) || "/xenon_logo.jpg";
+  let logoDataUrl = null;
+  let logoFmt = "JPEG";
+  try {
+    logoDataUrl = await loadImageAsDataUrl(logoPath);
+    // detect format from dataURL
+    const mime = (logoDataUrl.split(",")[0].match(/data:(image\/[a-zA-Z+]+);base64/) || [])[1] || "image/jpeg";
+    logoFmt = mime === "image/png" ? "PNG" : "JPEG";
+    // place logo centered at the very top
+    const logoW = 40; // max width
+    const logoH = 20; // fixed height (keeps proportion reasonable)
+    const logoX = (pageWidth - logoW) / 12;
+    const logoY = 8;
+    doc.addImage(logoDataUrl, logoFmt, logoX, logoY, logoW, logoH);
+  } catch (e) {
+    // ignore if logo not available
+    logoDataUrl = null;
+  }
+
+  // helpers for content
+  const safeRef = (booking.reference || booking.booking_name || Date.now()).toString().replace(/[^a-z0-9-_]/gi, "_");
+  const formatCurrency = (amt, cur) => {
+    const n = Number(amt || 0);
+    return `${cur ? cur + " " : ""}${n.toFixed(2)}`;
+  };
+  const formatDisplayDate = (d) => {
+    try {
+      const date = new Date(d);
+      return isNaN(date.getTime()) ? "" : date.toLocaleDateString();
+    } catch {
+      return "";
+    }
+  };
+
+  // header text (below the top logo if present)
+  const headerStartY = logoDataUrl ? 40 : 20;
+  const headerX = 14;
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.text("Xenon Hostel UG", headerX, headerStartY);
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text("Address Line 1", headerX, headerStartY + 6);
+  doc.text("Address Line 2", headerX, headerStartY + 11);
+  doc.text("Phone: (xxx) xxx-xxxx", headerX, headerStartY + 16);
+
+  // invoice meta (right)
+  doc.setFontSize(12);
+  doc.text(`Invoice #: ${booking.reference || safeRef}`, pageWidth - 14, headerStartY, { align: "right" });
+  doc.text(`Date: ${formatDisplayDate(new Date())}`, pageWidth - 14, headerStartY + 6, { align: "right" });
+
+  // customer / booking block
+  let startY = headerStartY + 32;
+  doc.setFontSize(11);
+  doc.text("Bill To:", 14, startY);
+  doc.setFontSize(10);
+  doc.text(`${booking.booking_name || "-"}`, 30, startY);
+  if (booking.booked_by) doc.text(`${booking.booked_by}`, 14, startY + 12);
+  if (booking.customer_id) doc.text(`Customer ID: ${booking.customer_id}`, 14, startY + 18);
+
+  // booking/payment info block (right)
+  const infoRightX = pageWidth - 14;
+  doc.text(`Payment Status: ${booking.payment?.payment_status || "N/A"}`, infoRightX, startY + 6, { align: "right" });
+  doc.text(`Method: ${booking.payment?.payment_method || "N/A"}`, infoRightX, startY + 12, { align: "right" });
+  doc.text(`Total: ${formatCurrency(booking.payment?.amount, booking.payment?.currency)}`, infoRightX, startY + 18, { align: "right" });
+
+  // table of booked beds using autoTable
+  const tableStartY = startY + 28;
+  const beds = (booking.booked_beds || []).map((bed, idx) => ([
+    String(idx + 1),
+    bed.bed_id || "-",
+    bed.room_id || "-",
+    formatDisplayDate(bed.checking_in_date),
+    formatDisplayDate(bed.checking_out_date)
+  ]));
+
+  autoTable(doc, {
+    head: [["#", "Bed ID", "Room ID", "Check-in", "Check-out"]],
+    body: beds.length ? beds : [["-", "-", "-", "-", "-"]],
+    startY: tableStartY,
+    theme: "grid",
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [40, 116, 240] }
+  });
+
+  // totals and notes after table
+  const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 8 : tableStartY + 40;
+  doc.setFontSize(11);
+  doc.text("Notes:", 14, finalY);
+  doc.setFontSize(10);
+  // wrap long notes
+  const notes = booking.notes || "Thank you for your business.";
+  const splitNotes = doc.splitTextToSize(notes, pageWidth - 28);
+  doc.text(splitNotes, 14, finalY + 6);
+
+  // totals on right
+  doc.setFontSize(11);
+  doc.text("Subtotal:", pageWidth - 60, finalY + 6, { align: "right" });
+  doc.text(formatCurrency(booking.payment?.amount || 0, booking.payment?.currency), pageWidth - 14, finalY + 6, { align: "right" });
+
+  // footer: page numbers + small logo bottom-left (JPEG supported)
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    if (logoDataUrl) {
+      doc.addImage(logoDataUrl, logoFmt, 14, pageHeight - 20, 30, 10);
+    }
+    const footerText = `Page ${i} of ${pageCount}`;
+    doc.setFontSize(9);
+    doc.text(footerText, pageWidth / 2, pageHeight - 10, { align: "center" });
+    doc.setFontSize(9);
+    doc.text("Xenon Hostel UG • contact@xenon.example", pageWidth - 14, pageHeight - 10, { align: "right" });
+  }
+
+  doc.save(`Invoice_${safeRef}.pdf`);
+}
+// ...existing code...
+
+
+
     const totalRevenue = (bookings) =>{
         // Sum booking.payment.amount for each booking (defensive parsing)
         const total = (bookings || []).reduce((sum, item) => {
@@ -216,6 +363,9 @@ const BookingsTable = () => {
 								Booking Date
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								Invoice
+							</th>
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Actions
 							</th>
 						</tr>
@@ -244,6 +394,11 @@ const BookingsTable = () => {
 					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.id:'no pay id'}</td> 
 					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.booked_by}</td>
 					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.booking_date}</td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+						<button className='text-blue-400 hover:text-blue-300' onClick={() => generateInvoice(booking)}>
+							<FileDownIcon className='mr-2' size={18} />
+						</button>
+					</td>
 					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 						<button className='text-red-400 hover:text-red-300'>
 							<View className='text-indigo-400 hover:text-indigo-300 mr-2' size={18} />
