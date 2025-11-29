@@ -171,9 +171,9 @@ const generateInvoice = async (booking) => {
 
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text("City: Dreieich", headerX, headerStartY + 6);
-  doc.text("Address: Robert-Bosch-Straße 32, 63303", headerX, headerStartY + 11);
-  doc.text("Phone: +49 172 4164023", headerX, headerStartY + 16);
+  doc.text("Robert-Bosch-Straße 32", headerX, headerStartY + 6);
+  doc.text("63303 Dreieich", headerX, headerStartY + 11);
+  doc.text("+49 172 4164023", headerX, headerStartY + 16);
 
   // invoice meta (right)
   doc.setFontSize(12);
@@ -183,20 +183,83 @@ const generateInvoice = async (booking) => {
   // customer / booking block
   let startY = headerStartY + 32;
   doc.setFontSize(11);
-  doc.text("Bill To:", 14, startY);
-  doc.setFontSize(10);
-  doc.text(`${booking.booking_name || "-"}`, 30, startY);
-  if (booking.customer_id) doc.text(`Customer ID: ${booking.customer_id}`, 14, startY + 18);
+    // fetch customer details (if available) and show them in the invoice
+  let customer = null;
+  if (booking.customer_id) {
+    try {
+      const token = sessionStorage.getItem("token");
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/hotel/customer/${booking.customer_id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${JSON.parse(token)}` } : {})
+          }
+        }
+      );
+      if (res.ok) customer = await res.json();
+	  console.log("Customer data for invoice:", customer.data);
+    } catch (e) {
+      // fail silently — we'll fall back to booking fields
+      customer = null;
+    }
+  }
 
+  doc.setFontSize(11);
+  doc.text("Bill To:", 14, startY);
+
+  doc.setFontSize(10);
+  // prefer customer.name/email/phone from API, else fall back to booking fields
+  const billName = customer.data?.names;
+  const billEmail = customer.data?.email;
+  const billPhone = customer.data?.phone;
+
+  doc.text(billName, 14, startY + 6);
+  let yOffset = startY + 12;
+  if (billEmail) {
+    doc.text(`Email: ${billEmail}`, 14, yOffset);
+    yOffset += 6;
+  }
+  if (billPhone) {
+    doc.text(`Phone: ${billPhone}`, 14, yOffset);
+    yOffset += 6;
+  }
+  if (customer.data.address_id) {
+	// fetch address details
+	  try {
+      const token = sessionStorage.getItem("token");
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/hotel/address/${customer.data.address_id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${JSON.parse(token)}` } : {})
+          }
+        }
+      );
+      if (res.ok) customer = await res.json();
+	  console.log("Customer data for invoice:", customer.data);
+    } catch (e) {
+      // fail silently — we'll fall back to booking fields
+      customer = null;
+    }
+    // wrap address if long
+	doc.text("Address:", 14, yOffset);
+    doc.text(customer.data.street, 14, yOffset + 6);
+	doc.text(customer.data.post_code + " " + customer.data.city, 14, yOffset + 12);
+  }
   // booking/payment info block (right)
   const infoRightX = pageWidth - 14;
   const statusLabel = getPaymentStatusLabel(booking.payment?.payment_status);
+  doc.text(`Net Amount: ${formatCurrency(booking.payment?.amount, booking.payment?.currency)}`, infoRightX, startY + 26, { align: "right" });
+  doc.text(`Tax: ${formatCurrency(booking.payment?.tax, booking.payment?.currency)}`, infoRightX, startY + 22, { align: "right" });
+  doc.text(`Gross Amount: ${formatCurrency(booking.payment?.amount + booking.payment?.tax, booking.payment?.currency)}`, infoRightX, startY + 18, { align: "right" });
   doc.text(`Payment Status: ${statusLabel}`, infoRightX, startY + 6, { align: "right" });
   doc.text(`Payment Method: ${booking.payment?.payment_method || "N/A"}`, infoRightX, startY + 12, { align: "right" });
-  doc.text(`Total: ${formatCurrency(booking.payment?.amount + booking.payment?.tax, booking.payment?.currency)}`, infoRightX, startY + 18, { align: "right" });
-
   // table of booked beds using autoTable
-  const tableStartY = startY + 28;
+  const tableStartY = startY + 42;
   const beds = (booking.booked_beds || []).map((bed, idx) => ([
     String(idx + 1),
     bed.bed_id || "-",
@@ -226,8 +289,8 @@ const generateInvoice = async (booking) => {
 
   // totals on right
   doc.setFontSize(11);
-  doc.text("Subtotal:", pageWidth - 60, finalY + 6, { align: "right" });
-  doc.text(formatCurrency(booking.payment?.amount || 0, booking.payment?.currency), pageWidth - 14, finalY + 6, { align: "right" });
+  doc.text("Total Paid:", pageWidth - 60, finalY + 6, { align: "right" });
+  doc.text(formatCurrency(booking.payment?.amount + booking.payment?.tax || 0, booking.payment?.currency), pageWidth - 14, finalY + 6, { align: "right" });
 
   // footer: page numbers + small logo bottom-left (JPEG supported)
   const pageCount = doc.internal.getNumberOfPages();
