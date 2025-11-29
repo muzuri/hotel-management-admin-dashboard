@@ -177,8 +177,8 @@ const generateInvoice = async (booking) => {
 
   // invoice meta (right)
   doc.setFontSize(12);
-  doc.text(`Invoice #: ${booking.reference || safeRef}`, pageWidth - 14, headerStartY, { align: "right" });
-  doc.text(`Date: ${formatDisplayDate(new Date())}`, pageWidth - 14, headerStartY + 6, { align: "right" });
+  doc.text(`Rechnungsnummer/ Invoice Number: ${booking.reference || safeRef}`, pageWidth - 14, headerStartY, { align: "right" });
+  doc.text(`Rechnungsdatum/ Invoice Date: ${formatDisplayDate(new Date())}`, pageWidth - 14, headerStartY + 6, { align: "right" });
 
   // customer / booking block
   let startY = headerStartY + 32;
@@ -206,10 +206,12 @@ const generateInvoice = async (booking) => {
     }
   }
 
-  doc.setFontSize(11);
-  doc.text("Bill To:", 14, startY);
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Kunde/Client:", 14, startY);
 
   doc.setFontSize(10);
+  doc.setFont("helvetica", "normal")
   // prefer customer.name/email/phone from API, else fall back to booking fields
   const billName = customer.data?.names;
   const billEmail = customer.data?.email;
@@ -218,11 +220,11 @@ const generateInvoice = async (booking) => {
   doc.text(billName, 14, startY + 6);
   let yOffset = startY + 12;
   if (billEmail) {
-    doc.text(`Email: ${billEmail}`, 14, yOffset);
+    doc.text(billEmail, 14, yOffset);
     yOffset += 6;
   }
   if (billPhone) {
-    doc.text(`Phone: ${billPhone}`, 14, yOffset);
+    doc.text(billPhone, 14, yOffset);
     yOffset += 6;
   }
   if (customer.data.address_id) {
@@ -253,9 +255,9 @@ const generateInvoice = async (booking) => {
   // booking/payment info block (right)
   const infoRightX = pageWidth - 14;
   const statusLabel = getPaymentStatusLabel(booking.payment?.payment_status);
-  doc.text(`Net Amount: ${formatCurrency(booking.payment?.amount, booking.payment?.currency)}`, infoRightX, startY + 26, { align: "right" });
-  doc.text(`Tax: ${formatCurrency(booking.payment?.tax, booking.payment?.currency)}`, infoRightX, startY + 22, { align: "right" });
-  doc.text(`Gross Amount: ${formatCurrency(booking.payment?.amount + booking.payment?.tax, booking.payment?.currency)}`, infoRightX, startY + 18, { align: "right" });
+  doc.text(`Netto(Net Amount): ${formatCurrency(booking.payment?.amount, booking.payment?.currency)}`, infoRightX, startY + 18, { align: "right" });
+  doc.text(`MwSt./VAT(7%): ${formatCurrency(booking.payment?.tax, booking.payment?.currency)}`, infoRightX, startY + 24, { align: "right" });
+  doc.text(`Brutto(Total Amount Due): ${formatCurrency(booking.payment?.amount + booking.payment?.tax, booking.payment?.currency)}`, infoRightX, startY + 30, { align: "right" });
   doc.text(`Payment Status: ${statusLabel}`, infoRightX, startY + 6, { align: "right" });
   doc.text(`Payment Method: ${booking.payment?.payment_method || "N/A"}`, infoRightX, startY + 12, { align: "right" });
   // table of booked beds using autoTable
@@ -283,9 +285,12 @@ const generateInvoice = async (booking) => {
   doc.text("Notes:", 14, finalY);
   doc.setFontSize(10);
   // wrap long notes
-  const notes = booking.notes || "Thank you for Booking With us.";
+  const notes = booking.notes || "Total amount (Brutto) includes 7% VAT.";
   const splitNotes = doc.splitTextToSize(notes, pageWidth - 28);
   doc.text(splitNotes, 14, finalY + 6);
+  doc.text("Hinweis: Der Gesamtbetrag (Brutto) enthält 7% Mehrwertsteuer.", 14, finalY + 12)
+
+
 
   // totals on right
   doc.setFontSize(11);
