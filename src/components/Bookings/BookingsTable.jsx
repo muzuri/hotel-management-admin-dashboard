@@ -6,7 +6,7 @@ import StatCard from "../common/StatCard";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Package,TrendingUp, AlertTriangle,DollarSign, EuroIcon } from 'lucide-react'
-
+import { getPaymentStatusLabel, getStatusBadgeClass } from "../Utils/helpers";
 const BookingsTable = () => {
 	const formatDate = (date) => {
 		const day = String(date.getDate()).padStart(2, '0');
@@ -74,7 +74,13 @@ const BookingsTable = () => {
 			return (!from || itemDate >= from) && (!to || itemDate <= to);
 		  });
 	  
+
+		//   {"id":214,"created_by":null,"updated_by":null,"created_at":"2025-07-11T17:26:56.25972",
+		// "updated_at":null,"deleted_by":null,"booking_name":"Jean de Dieu BIRORI","booking_date":"2025-07-11",
+		// "status":null,
+		// 	"customer_id":"12","reference":"00000214","booked_by":"0","booked_beds"
 		  setFilteredData(filtered);
+		  console.log('filtered by date ....'+ JSON.stringify(filtered));
 		  totalRevenue(filtered)
 		  setTotalBooking(filtered.length)
 	},[startDate, endDate, data])
@@ -165,9 +171,9 @@ const generateInvoice = async (booking) => {
 
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text("Address Line 1", headerX, headerStartY + 6);
-  doc.text("Address Line 2", headerX, headerStartY + 11);
-  doc.text("Phone: (xxx) xxx-xxxx", headerX, headerStartY + 16);
+  doc.text("City: Dreieich", headerX, headerStartY + 6);
+  doc.text("Address: Robert-Bosch-Straße 32, 63303", headerX, headerStartY + 11);
+  doc.text("Phone: +49 172 4164023", headerX, headerStartY + 16);
 
   // invoice meta (right)
   doc.setFontSize(12);
@@ -180,14 +186,14 @@ const generateInvoice = async (booking) => {
   doc.text("Bill To:", 14, startY);
   doc.setFontSize(10);
   doc.text(`${booking.booking_name || "-"}`, 30, startY);
-  if (booking.booked_by) doc.text(`${booking.booked_by}`, 14, startY + 12);
   if (booking.customer_id) doc.text(`Customer ID: ${booking.customer_id}`, 14, startY + 18);
 
   // booking/payment info block (right)
   const infoRightX = pageWidth - 14;
-  doc.text(`Payment Status: ${booking.payment?.payment_status || "N/A"}`, infoRightX, startY + 6, { align: "right" });
-  doc.text(`Method: ${booking.payment?.payment_method || "N/A"}`, infoRightX, startY + 12, { align: "right" });
-  doc.text(`Total: ${formatCurrency(booking.payment?.amount, booking.payment?.currency)}`, infoRightX, startY + 18, { align: "right" });
+  const statusLabel = getPaymentStatusLabel(booking.payment?.payment_status);
+  doc.text(`Payment Status: ${statusLabel}`, infoRightX, startY + 6, { align: "right" });
+  doc.text(`Payment Method: ${booking.payment?.payment_method || "N/A"}`, infoRightX, startY + 12, { align: "right" });
+  doc.text(`Total: ${formatCurrency(booking.payment?.amount + booking.payment?.tax, booking.payment?.currency)}`, infoRightX, startY + 18, { align: "right" });
 
   // table of booked beds using autoTable
   const tableStartY = startY + 28;
@@ -214,7 +220,7 @@ const generateInvoice = async (booking) => {
   doc.text("Notes:", 14, finalY);
   doc.setFontSize(10);
   // wrap long notes
-  const notes = booking.notes || "Thank you for your business.";
+  const notes = booking.notes || "Thank you for Booking With us.";
   const splitNotes = doc.splitTextToSize(notes, pageWidth - 28);
   doc.text(splitNotes, 14, finalY + 6);
 
@@ -234,7 +240,7 @@ const generateInvoice = async (booking) => {
     doc.setFontSize(9);
     doc.text(footerText, pageWidth / 2, pageHeight - 10, { align: "center" });
     doc.setFontSize(9);
-    doc.text("Xenon Hostel UG • contact@xenon.example", pageWidth - 14, pageHeight - 10, { align: "right" });
+    doc.text("Xenon Hostel UG • bookings@xenonhostel.com", pageWidth - 14, pageHeight - 10, { align: "right" });
   }
 
   doc.save(`Invoice_${safeRef}.pdf`);
@@ -317,21 +323,6 @@ const generateInvoice = async (booking) => {
 						<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 							    #
 							</th>
-							{/* <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Bed ID
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Room ID
-							</th> */}
-							{/* <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Booking ID
-							</th> */}
-							{/* <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Checkin Date
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Checkout Date
-							</th> */}
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Reference ID
 							</th>
@@ -344,23 +335,24 @@ const generateInvoice = async (booking) => {
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Amount Paid
 							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Method
+							<th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+								Tax
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Status
+								Total Amount
+							</th>
+						
+							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								Payment Method
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Currency
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Payment ID
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Booked By
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Booking Date
+							</th>
+								<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+								Payment Status
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Invoice
@@ -388,12 +380,16 @@ const generateInvoice = async (booking) => {
 					<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100 flex gap-2 items-center'>{booking.booking_name}</td>
 					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.customer_id}</td>
 					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.amount :'not yet payed'}</td> 
-					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.payment_method:'not payed'}</td>
-					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.payment_status:'no pay method'}</td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.tax :'no tax info'}</td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? (Number(booking.payment.amount) + Number(booking.payment.tax)).toFixed(2) :'no total amount'}</td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.payment_method:'no payment method'}</td>
 					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.currency:'no currency'}</td>
-					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.id:'no pay id'}</td> 
-					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.booked_by}</td>
 					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.booking_date}</td>
+									<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+						<span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(booking.payment?.payment_status)}`}>
+							{getPaymentStatusLabel(booking.payment?.payment_status)}
+						</span>
+					</td>
 					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 						<button className='text-blue-400 hover:text-blue-300' onClick={() => generateInvoice(booking)}>
 							<FileDownIcon className='mr-2' size={18} />

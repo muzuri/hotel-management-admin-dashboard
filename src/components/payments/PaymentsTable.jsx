@@ -8,6 +8,7 @@ import axios from 'axios';
 
 import Buttons from '../common/Buttons';
 import LoadingRing from '../common/LoadingRing';
+import { getPaymentStatusLabel, getStatusBadgeClass } from '../Utils/helpers';
 
 const PaymentsTable = ({updateMessage}) => {
     const [isLoading, setIsLoading] = useState(true);
@@ -32,14 +33,6 @@ const PaymentsTable = ({updateMessage}) => {
 		payment_status: "",
 		tax: ""
 	  });
-// 	const [viewStack, setViewStack] = useState(["ListPayments"]);
-//     const currentView = viewStack[viewStack.length-1];
-//     const goTo = (view) => setViewStack((prev) => [...prev, view]);
-//     const goBack = () => {
-//     if (viewStack.length > 1) {
-//       setViewStack((prev) => prev.slice(0, -1));
-//     }
-//   };
 	useEffect(() => {
 	  // Fetch data from API
 	  fetchData();
@@ -298,21 +291,9 @@ const PaymentsTable = ({updateMessage}) => {
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.payment_method}</td>
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 								<span
-										className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-											payment.payment_status ==='ENT'
-												? "bg-neutral-600 text-green-100" : payment.payment_status ==='SUC'
-												? "bg-green-800 text-green-100" : payment.payment_status ==='FAL'
-												? "bg-red-800 text-red-100" : "bg-amber-500 text-amber-50"
-										}`}
-									>
-								{payment.payment_status ==='SUC' ? "Success":
-									payment.payment_status ==='ENT' ? "Initiated" : 
-									payment.payment_status ==='PEN' ? "Pending" : 
-									payment.payment_status ==='FAL' ? "Failed": 
-									payment.payment_status ==='REQ' ? "Requested":
-									payment.payment_status  ==='CRE' ? "Created" :
-									payment.payment_status }
-							</span>
+									className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(payment.payment_status)}`}>
+									{getPaymentStatusLabel(payment.payment_status)}
+								</span>
 							</td>
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 							<button className='text-red-400 hover:text-red-300' onClick={() => handleChangeStatus(payment.id)}>
