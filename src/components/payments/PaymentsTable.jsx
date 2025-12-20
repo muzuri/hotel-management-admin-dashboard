@@ -1,11 +1,11 @@
-import React from 'react'
 import { motion } from "framer-motion";
 import { Edit, Search, Trash2, Check, X } from "lucide-react";
 import { IoAddCircle, IoBed } from "react-icons/io5"
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
-
+import React, { useEffect, useState, useContext } from 'react'
+import { AuthContext } from '../../context/AuthContext';
+import {isTokenExpired} from '../../context/isTokenExpired'
 import Buttons from '../common/Buttons';
 import LoadingRing from '../common/LoadingRing';
 import { getPaymentStatusLabel, getStatusBadgeClass } from '../Utils/helpers';
@@ -22,6 +22,7 @@ const PaymentsTable = ({updateMessage}) => {
     const[selectedPayment, setSelectedPayment] = useState(null);
     const[showPaymentsTable, setShowPaymentsTable]= useState(true);
 	const[showModal, setShowModal] = useState(false);
+	const { logout } = useContext(AuthContext);
 	const [formData, setFormData] = useState({
 		amount: "",
 		exchange_rate: "",
@@ -42,6 +43,10 @@ const PaymentsTable = ({updateMessage}) => {
 		try {
 			const token = sessionStorage.getItem('token');
 			if(!token) return;
+			if(isTokenExpired(token)){
+				console.error('Token is expired...')
+				logout()
+			}
 			const response = await fetch(url, {
 				method: "GET",
 				headers: {

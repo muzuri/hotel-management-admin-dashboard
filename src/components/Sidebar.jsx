@@ -1,43 +1,46 @@
 
-import { BarChart2, DollarSign, Menu, Settings, ShoppingBag, ShoppingCart, TrendingUp, Users, BookImageIcon, HomeIcon, BedIcon, LogOut } from 'lucide-react'
+import { BarChart2, DollarSign, Menu, Settings, ShoppingBag, ShoppingCart, TrendingUp, Users, BookImageIcon, HomeIcon, BedIcon, LogOut, Tags  } from 'lucide-react'
 import { FaHome, FaUser, FaCog, FaChevronDown, FaChevronRight } from "react-icons/fa";
 import { MdMeetingRoom } from "react-icons/md";
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext';
 const SIDEBAR_ITEMS = [
 // {name:"Overview", icon: BarChart2, color:"#6366f1", href:'/'},
 {
-    name:"Bookings", icon: ShoppingBag, color:"#99746f1", href:'/bookings'
+    name:"Bookings", icon: ShoppingBag, color:"#99746f1", href:'/bookings', allowed: ["SUPER_ADMIN", "MANAGER", "RECEPTION"] 
 },
 {
-    name:"Rooms", icon: MdMeetingRoom, color:"#6366f1", href:'/rooms'
+    name:"Rooms", icon: MdMeetingRoom, color:"#6366f1", href:'/rooms', allowed: ["SUPER_ADMIN", "ADMIN", "MANAGER"] 
 }
 ,
 {
-    name:"Beds", icon: BedIcon, color:"#6366f1", href:'/beds'
+    name:"Beds", icon: BedIcon, color:"#6366f1", href:'/beds', allowed: ["SUPER_ADMIN", "ADMIN", "MANAGER"] //SUPER_ADMIN, ADMIN, RECEPTION, MANAGER, CUSTOMER
 },
 {
-    name:"Users", icon: Users, color:"#6366f1", href:'/users'
+    name:"Users", icon: Users, color:"#6366f1", href:'/users', allowed: ["SUPER_ADMIN", "ADMIN", "MANAGER"] //SUPER_ADMIN, ADMIN, RECEPTION, MANAGER, CUSTOMER
 },
 {
-    name:"Sales", icon: DollarSign, color:"#6366f1", href:'/sales'
+    name:"Promo", icon: Tags, color:"#6366f1", href:'/promo', allowed: ["SUPER_ADMIN", "MANAGER"] //SUPER_ADMIN, ADMIN, RECEPTION, MANAGER, CUSTOMER
 },
 {
-    name:"Payments", icon: ShoppingCart, color:"#6366f1", href:'/payments'
+    name:"Checkins", icon: DollarSign, color:"#6366f1", href:'/checkins', allowed: ["SUPER_ADMIN", "MANAGER", "RECEPTION" ] //SUPER_ADMIN, ADMIN, RECEPTION, MANAGER, CUSTOMER
 },
 {
-    name:"Invoices", icon: ShoppingCart, color:"#6366f1", href:'/invoices'
+    name:"Payments", icon: ShoppingCart, color:"#6366f1", href:'/payments', allowed: ["SUPER_ADMIN", "MANAGER", "RECEPTION"] //SUPER_ADMIN, ADMIN, RECEPTION, MANAGER, CUSTOMER
 },
 {
-    name:"Analytics", icon: TrendingUp, color:"#6366f1", href:'analytics'
+    name:"Invoices", icon: ShoppingCart, color:"#6366f1", href:'/invoices', allowed: ["SUPER_ADMIN", "MANAGER", "RECEPTION"] //SUPER_ADMIN, ADMIN, RECEPTION, MANAGER, CUSTOMER
+},
+// {
+//     name:"Analytics", icon: TrendingUp, color:"#6366f1", href:'analytics'
+// },
+{
+    name:"Settings", icon: Settings, color:"#6366f1", href:'/settings', allowed: ["SUPER_ADMIN", "ADMIN", "MANAGER", "RECEPTION"] //SUPER_ADMIN, ADMIN, RECEPTION, MANAGER, CUSTOMER
 },
 {
-    name:"Settings", icon: Settings, color:"#6366f1", href:'/settings'
-},
-{
-    name:"Logout", icon: LogOut, color:"#6366f1", href:'/logout'
+    name:"Logout", icon: LogOut, color:"#6366f1", href:'/logout', allowed: ["SUPER_ADMIN", "ADMIN", "MANAGER", "RECEPTION"] //SUPER_ADMIN, ADMIN, RECEPTION, MANAGER, CUSTOMER
 }
 // {
 //     name: "User Settings",
@@ -55,6 +58,16 @@ const SIDEBAR_ITEMS = [
 function Sidebar() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true)
     const { logout } = useContext(AuthContext);
+    const [role, setRole] = useState(null)
+      useEffect(()=>{
+        handleRole()
+      })
+      const handleRole=()=>{
+        const userObj = sessionStorage.getItem('user');
+            if(!userObj) return;
+            const user = JSON.parse(userObj);
+            setRole(user.role)
+      }
     return (
         <motion.div
         className={`relative z-10 transition-all duration-30 ease-in-out flex-shrink-0 ${isSidebarOpen? 'w-64':'w-20'}`}
@@ -70,6 +83,8 @@ function Sidebar() {
                 </motion.button>
                 <nav className='mt-8 flex-grow'>
                     {SIDEBAR_ITEMS.map((item, index)=>(
+                       <>
+                        {(role && item.allowed.includes(role)) &&
                         <Link key={item.href} to={item.href}>
                             <motion.div
                             className='flex items-center p-4 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors mb-2'>
@@ -88,7 +103,7 @@ function Sidebar() {
                                     )}
                                 </AnimatePresence>
                             </motion.div>
-                        </Link>
+                        </Link>}</> 
                     ))}
                 </nav>
             </div>

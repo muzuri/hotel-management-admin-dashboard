@@ -1,11 +1,11 @@
-import React from 'react'
+import React, { useEffect, useState, useContext } from 'react'
+import { AuthContext } from '../../context/AuthContext';
 import { motion } from "framer-motion";
 import { Edit, Search, Trash2, Check, X } from "lucide-react";
 import { IoAddCircle, IoBed } from "react-icons/io5"
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import {isTokenExpired} from '../../context/isTokenExpired'
 import axios from 'axios';
-
 import Buttons from '../common/Buttons';
 import LoadingRing from '../common/LoadingRing';
 
@@ -18,6 +18,7 @@ const BedsTable = ({updateMessage}) => {
     const[selectedBed, setSelectedBed] = useState(null);
     const[showBedsTable, setShowBedsTable]= useState(true);
 	const[showModal, setShowModal] = useState(false);
+	const { logout } = useContext(AuthContext);
 	const [formData, setFormData] = useState({
 		size:"",
 		bed_num:"",
@@ -43,6 +44,10 @@ const BedsTable = ({updateMessage}) => {
 		try {
 			const token = sessionStorage.getItem('token');
 			if(!token) return;
+			if(isTokenExpired(token)){
+				console.error('Token is expired...')
+				logout()
+			}
 			const response = await fetch(url, {
 				method: "GET",
 				headers: {
@@ -221,7 +226,7 @@ const BedsTable = ({updateMessage}) => {
 								Created By
 							</th> */}
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								created date
+								Bed number
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Size
@@ -278,7 +283,7 @@ const BedsTable = ({updateMessage}) => {
 				</td> */}
 
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-					{bed.created_at}
+					Bed no-{bed.bed_num}
 				</td>
 
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>

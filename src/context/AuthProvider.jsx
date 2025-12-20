@@ -34,12 +34,14 @@ export const AuthProvider = ({ children }) => {
 
         const data = await res.json();
         console.log("------>", data.token)
-        if (data.status==1) {
+        if (data.status==1 && data.user.role !=='CUSTOMER') {
           setToken(data.token)
           sessionStorage.setItem("token", JSON.stringify(data.token));
           sessionStorage.setItem("user", JSON.stringify(data.user));
           console.log(data.token)
           return { success: true };
+        }else if (data.user.role ==='CUSTOMER') {
+          return { success: false, message: 'User not authorized' };
         } else {
           console.log("Login failed");
           // sessionStorage.setItem("message", JSON.stringify(data.error));
@@ -76,6 +78,7 @@ export const AuthProvider = ({ children }) => {
       const logout = () => {
         setToken(null);
         sessionStorage.removeItem("token");
+        sessionStorage.removeItem("user");
       };
     
       // const isAuthenticated = !!token;

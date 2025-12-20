@@ -76,6 +76,7 @@ const AvailableBeds = ({updateMessage}) => {
       if (!response.ok) {
           setError('Failed to submit the data. Please try again.')
       }
+      console.log(response.status)
       const data = await response.json();
       const avai = availableBeds(data);
       console.log('------------ Booked are this ');

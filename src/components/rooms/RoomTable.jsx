@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState, useMemo, useContext } from 'react'
 import { Search, Settings, Plus} from "lucide-react";
 import { IoAddCircle, IoBed } from "react-icons/io5"
 import { MdMeetingRoom } from "react-icons/md";
@@ -8,6 +8,8 @@ import axios from 'axios';
 import { debounce } from "lodash";
 import UserRoom from './UserRoom';
 import LoadingRing from '../common/LoadingRing';
+import { isTokenExpired } from '../../context/isTokenExpired'
+import { AuthContext } from '../../context/AuthContext';
 
 const RoomTable = ({updateMessage,bookedRom }) => {
     // State to hold the data, loading status, and any errors
@@ -25,6 +27,8 @@ const RoomTable = ({updateMessage,bookedRom }) => {
     const [register, setRegister] = useState(false);
     const [editRowId, setEditRow] = useState(null);
     const[showModal, setShowModal] = useState(false);
+    const[role, setRole] = useState('');
+    const { logout } = useContext(AuthContext);
     const [formData, setFormData] = useState({
       size: "",
       bed_size: "",
@@ -41,6 +45,7 @@ const RoomTable = ({updateMessage,bookedRom }) => {
     const [buttons] = useState([
       {
         id: 1,
+        allowed: ['ADMIN', 'SUPER_ADMIN', 'MANAGER'],
         label: "Add new Room",
         disabled: false,
         icon: <IoAddCircle size={18}/>,
@@ -74,7 +79,11 @@ const RoomTable = ({updateMessage,bookedRom }) => {
         setError("No token found");
         return;
     }
-    console.log('------>', token)
+    if(isTokenExpired(token)){
+      console.error('Token is expired...')
+      logout()
+    }
+    handleRole()
     // Define the URL of the API
     const url = `${import.meta.env.VITE_API_BASE_URL}/hotel/room`;
     // Fetch data
@@ -86,8 +95,9 @@ const RoomTable = ({updateMessage,bookedRom }) => {
               "Accept": "application/json"
           }})
       .then((response) => {
+        console.log(response)
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          throw new Error('Network response was not ok---');
         }
         return response.json();
       })
@@ -98,9 +108,16 @@ const RoomTable = ({updateMessage,bookedRom }) => {
       .catch((error) => {
         setError(error.message);  // Store any error that occurs during the fetch
         setLoading(false);  // Set loading to false if an error occurs
-        
+        console.log(error.message)
       });
-  }, []);  // Empty dependency array means it runs once when the component mounts
+  }, []);
+  const handleRole=()=>{
+      const userObj = sessionStorage.getItem('user');
+      if(!userObj) return;
+      const user = JSON.parse(userObj);
+      setRole(user.role)
+  }
+   // Empty dependency array means it runs once when the component mounts
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
@@ -228,8 +245,8 @@ const handleClose= () => {
 
 			<div className='flex justify-between items-end mb-6'>
       <div className='flex gap-4 p-6'>
-        {buttons.map((btn) => (
-        <motion.button
+        {buttons.map((btn) => (<>
+        {(role && btn.allowed.includes(role)) &&<motion.button
           key={btn.id}
           whileTap={{ scale: 0.95 }}
           disabled={btn.disabled}
@@ -239,7 +256,7 @@ const handleClose= () => {
         >
           {btn.icon}
           {btn.label}
-        </motion.button>
+        </motion.button>}</>
       ))}
     </div>
         <div className='relative'>
