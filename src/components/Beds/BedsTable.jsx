@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Edit, Search, Trash2, Check, X } from "lucide-react";
 import { IoAddCircle, IoBed } from "react-icons/io5"
 import { useNavigate } from "react-router-dom";
-import {isTokenExpired} from '../../context/isTokenExpired'
+import {isTokenExpired} from '../../context/AuthUtil'
 import axios from 'axios';
 import Buttons from '../common/Buttons';
 import LoadingRing from '../common/LoadingRing';

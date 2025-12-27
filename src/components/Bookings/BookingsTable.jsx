@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import React, { useEffect, useState, useContext } from 'react'
 import { AuthContext } from '../../context/AuthContext';
-import {isTokenExpired} from '../../context/isTokenExpired'
+import {isTokenExpired} from '../../context/AuthUtil'
 import { Edit, Search, Trash2, View, TextIcon, FileDownIcon } from "lucide-react";
 import * as XLSX from "xlsx";
 import StatCard from "../common/StatCard";
