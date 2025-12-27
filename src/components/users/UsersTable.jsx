@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { IoAddCircle } from "react-icons/io5"
 import { Search } from "lucide-react";
 import LoadingRing from '../common/LoadingRing';
+import { handleRole } from "../../context/AuthUtil";
 
 const UsersTable = () => {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [filteredUsers, setFilteredUsers] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const[role, setRole] = useState('');
 	const handleSearch = (e) => {
 		const term = e.target.value.toLowerCase();
 		setSearchTerm(term);
@@ -18,9 +21,22 @@ const UsersTable = () => {
     const clickEdit=()=>{
         console.log("Edit Button Clicked")
     }
+	const [buttons] = useState([
+      {
+        id: 1,
+        allowed: ['ADMIN', 'SUPER_ADMIN', 'MANAGER'],
+        label: "Add new Room",
+        disabled: false,
+        icon: <IoAddCircle size={18}/>,
+        onClick: ()=> updateMessage("newRoom"),
+      }
+    ]);
 	useEffect(() => {
-	  // Fetch data from API
-	  fetchData();
+	  	// Fetch data from API
+	  	fetchData();
+	  	const user = handleRole()
+		console.error(user.role)
+		setRole(user.role)
 	}, []);
 	const fetchData = async () => {
 		const url = `${import.meta.env.VITE_API_BASE_URL}/hotel/user`
@@ -57,6 +73,21 @@ const UsersTable = () => {
 			transition={{ delay: 0.1 }}
 		>
 			<div className='flex justify-between items-center mb-6'>
+				<div className='flex gap-4 p-6'>
+						{buttons.map((btn) => (<>
+						{(role && btn.allowed.includes(role)) &&<motion.button
+						  key={btn.id}
+						  whileTap={{ scale: 0.95 }}
+						  disabled={btn.disabled}
+						  onClick={btn.onClick}
+						  className={`flex items-center gap-2 py-2 px-4 rounded-lg font-medium shadow-md transition-all
+							${btn.disabled ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-green-500 hover:bg-indigo-600 text-white"}`}
+						>
+						  {btn.icon}
+						  {btn.label}
+						</motion.button>}</>
+					  ))}
+				</div>
 				<h2 className='text-xl font-semibold text-gray-100'>Users</h2>
 				<div className='relative'>
 					<input

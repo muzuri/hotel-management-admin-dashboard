@@ -5,7 +5,7 @@ import {motion} from 'framer-motion'
 import { Eye } from 'lucide-react';
 import axios from 'axios';
 import LoadingRing from '../common/LoadingRing';
-import { isTokenExpired } from '../../context/isTokenExpired'
+import { isTokenExpired } from '../../context/AuthUtil'
 import { AuthContext } from '../../context/AuthContext';
 
 const CheckTable = ({updateMessage,bookedRom }) => {

@@ -11,3 +11,10 @@ export const isTokenExpired=(token)=>{
     return true;
   }
 }
+
+export const handleRole=()=>{
+      const userObj = sessionStorage.getItem('user');
+      if(!userObj) return;
+      const user = JSON.parse(userObj);
+      return user
+}

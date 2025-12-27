@@ -38,9 +38,6 @@ const SIDEBAR_ITEMS = [
 // },
 {
     name:"Settings", icon: Settings, color:"#6366f1", href:'/settings', allowed: ["SUPER_ADMIN", "ADMIN", "MANAGER", "RECEPTION"] //SUPER_ADMIN, ADMIN, RECEPTION, MANAGER, CUSTOMER
-},
-{
-    name:"Logout", icon: LogOut, color:"#6366f1", href:'/logout', allowed: ["SUPER_ADMIN", "ADMIN", "MANAGER", "RECEPTION"] //SUPER_ADMIN, ADMIN, RECEPTION, MANAGER, CUSTOMER
 }
 // {
 //     name: "User Settings",
@@ -105,6 +102,25 @@ function Sidebar() {
                             </motion.div>
                         </Link>}</> 
                     ))}
+                    
+                    <Link key={'/logout'} to={'/logout'}>
+                        <motion.div className='flex items-center p-4 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors mb-2'>
+                            <LogOut size={20} style={{color:"#6366f1", minWidth: "20px"}} ></LogOut>
+                            <AnimatePresence>
+                                {isSidebarOpen && 
+                                (<motion.span
+                                className='ml-4 whitespace-nowrap'
+                                initial={{opacity: 0, width: 0}}
+                                animate={{opacity: 7, width:"auto"}}
+                                exit={{opacity: 0, width:0}}
+                                transition={{duration:0.2, delay:0.1}}
+                                    >
+                                    {"Logout"}
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
+                        </motion.div>
+                    </Link>
                 </nav>
             </div>
 

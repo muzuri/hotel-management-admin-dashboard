@@ -8,7 +8,7 @@ import axios from 'axios';
 import { debounce } from "lodash";
 import UserRoom from './UserRoom';
 import LoadingRing from '../common/LoadingRing';
-import { isTokenExpired } from '../../context/isTokenExpired'
+import { isTokenExpired, handleRole } from '../../context/AuthUtil'
 import { AuthContext } from '../../context/AuthContext';
 
 const RoomTable = ({updateMessage,bookedRom }) => {
@@ -83,7 +83,8 @@ const RoomTable = ({updateMessage,bookedRom }) => {
       console.error('Token is expired...')
       logout()
     }
-    handleRole()
+    const user = handleRole()
+    setRole(user.role)
     // Define the URL of the API
     const url = `${import.meta.env.VITE_API_BASE_URL}/hotel/room`;
     // Fetch data
@@ -111,12 +112,7 @@ const RoomTable = ({updateMessage,bookedRom }) => {
         console.log(error.message)
       });
   }, []);
-  const handleRole=()=>{
-      const userObj = sessionStorage.getItem('user');
-      if(!userObj) return;
-      const user = JSON.parse(userObj);
-      setRole(user.role)
-  }
+  
    // Empty dependency array means it runs once when the component mounts
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();

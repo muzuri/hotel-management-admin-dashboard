@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import React, { useEffect, useState, useContext } from 'react'
 import { AuthContext } from '../../context/AuthContext';
-import {isTokenExpired} from '../../context/isTokenExpired'
+import {isTokenExpired} from '../../context/AuthUtil'
 import Buttons from '../common/Buttons';
 import LoadingRing from '../common/LoadingRing';
 import { getPaymentStatusLabel, getStatusBadgeClass } from '../Utils/helpers';
@@ -171,15 +171,15 @@ const PaymentsTable = ({updateMessage}) => {
 		setAmount(row.amount)
 		setFormData(
 		  {
-		amount: row.amount,
-		exchange_rate: row.exchange_rate,
-		net_mount: row.net_mount,
-		payment_fee: row.payment_fee,
-		booking_id: row.booking_id,
-		id: row.id,
-		payment_method: row.payment_method,
-		payment_status: row.payment_status,
-		tax: row.tax
+			amount: row.amount,
+			exchange_rate: row.exchange_rate,
+			net_mount: row.net_mount,
+			payment_fee: row.payment_fee,
+			booking_id: row.booking_id,
+			id: row.id,
+			payment_method: row.payment_method,
+			payment_status: row.payment_status,
+			tax: row.tax
 		  }
 		);
 		setShowModal(true);
@@ -325,109 +325,109 @@ const PaymentsTable = ({updateMessage}) => {
 
 			</div>
 			{showModal && (
-        	<div className="bg-gray-800 bg-opacity-50 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 bg-opacity-50 bg-opacity-50 rounded-xl p-6 w-full max-w-md shadow-lg">
-            <h3 className="text-lg font-bold mb-4">Edit Payment</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block mb-1 text-sm font-medium">Bookining ID</label>
-                <input
-                      type="text"
-                      name="size"
-                      value={formData.booking_id}
-                      className="border p-2 w-full rounded"
-                    />
-              </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Amount</label>
-                <input
-					type="text"
-					name="bed_num"
-					value={amount}
-					onChange={(e) =>
-						setAmount(e.target.value)
-					}
-					className="border p-2 w-full rounded"
-                    />
-              </div>
-			
-              <div>
-                <label className="block mb-1 text-sm font-medium">Tax</label>
-                <input
-                      type="text"
-                      name="currency"
-                      value={formData.tax}
-                      onChange={(e) =>
-                        setFormData({ ...formData, currency: e.target.value })
-                      }
-                      className="border p-2 w-full rounded"
-                    />
-              </div>
-              
-              <div>
-                <label className="block mb-1 text-sm font-medium">Status</label>
-                <input
-                      type="text"
-                      name="status"
-					//   readOnly={true}
-                      value={formData.payment_status}
-                      onChange={(e) =>
-                        setFormData({ ...formData, status: e.target.value })
-                      }
-                      className="border p-2 w-full rounded"
-                    />
-              </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Payment channel</label>
-                <select
-                      type="text"
-                      name="matt_size"
-                      value={payment_method}
-                      onChange={(e) =>
-                        setPaymentMethod(e.target.value)
-                      }
-                      className="border p-2 w-full rounded">
-					<option selected>Open this select menu</option>
-					<option value="CASH">CASH</option>
-					<option value="POS">POS</option>
-					<option value="OTHER">Other channels</option>
-				</select>
-              </div>
-			  {payment_method === 'OTHER' &&
-			  <div>
-                <label className="block mb-1 text-sm font-medium">Other channel</label>
-                <input
-                      type="text"
-                      name="other"
-					//   readOnly={true}
-                      value={other}
-                      onChange={(e) =>
-                        setOther(e.target.value)
-                      }
-                      className="border p-2 w-full rounded"
-                    />
-              </div>
-			  }
-              
-              
-            </div>
-            <div className="flex justify-end gap-2 mt-6">
-              <button
-                onClick={closeModal}
-                className="bg-gray-300 text-black px-4 py-2 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleUpdate}
-                className="bg-green-500 text-white px-4 py-2 rounded"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}            
+				<div className="bg-gray-800 bg-opacity-50 bg-opacity-50 flex items-center justify-center z-50">
+					<div className="bg-gray-800 bg-opacity-50 bg-opacity-50 rounded-xl p-6 w-full max-w-md shadow-lg">
+						<h3 className="text-lg font-bold mb-4">Edit Payment</h3>
+						<div className="space-y-4">
+						<div>
+							<label className="block mb-1 text-sm font-medium">Bookining ID</label>
+							<input
+								type="text"
+								name="size"
+								value={formData.booking_id}
+								className="border p-2 w-full rounded"
+								/>
+						</div>
+						<div>
+							<label className="block mb-1 text-sm font-medium">Amount</label>
+							<input
+								type="text"
+								name="bed_num"
+								value={amount}
+								onChange={(e) =>
+									setAmount(e.target.value)
+								}
+								className="border p-2 w-full rounded"
+								/>
+						</div>
+						
+						<div>
+							<label className="block mb-1 text-sm font-medium">Tax</label>
+							<input
+								type="text"
+								name="currency"
+								value={formData.tax}
+								onChange={(e) =>
+									setFormData({ ...formData, currency: e.target.value })
+								}
+								className="border p-2 w-full rounded"
+								/>
+						</div>
+						
+						<div>
+							<label className="block mb-1 text-sm font-medium">Status</label>
+							<input
+								type="text"
+								name="status"
+								//   readOnly={true}
+								value={formData.payment_status}
+								onChange={(e) =>
+									setFormData({ ...formData, status: e.target.value })
+								}
+								className="border p-2 w-full rounded"
+								/>
+						</div>
+						<div>
+							<label className="block mb-1 text-sm font-medium">Payment channel</label>
+							<select
+								type="text"
+								name="matt_size"
+								value={payment_method}
+								onChange={(e) =>
+									setPaymentMethod(e.target.value)
+								}
+								className="border p-2 w-full rounded">
+								<option selected>Open this select menu</option>
+								<option value="CASH">CASH</option>
+								<option value="POS">POS</option>
+								<option value="OTHER">Other channels</option>
+							</select>
+						</div>
+						{payment_method === 'OTHER' &&
+						<div>
+							<label className="block mb-1 text-sm font-medium">Other channel</label>
+							<input
+								type="text"
+								name="other"
+								//   readOnly={true}
+								value={other}
+								onChange={(e) =>
+									setOther(e.target.value)
+								}
+								className="border p-2 w-full rounded"
+								/>
+						</div>
+						}
+						
+						
+						</div>
+						<div className="flex justify-end gap-2 mt-6">
+						<button
+							onClick={closeModal}
+							className="bg-gray-300 text-black px-4 py-2 rounded"
+						>
+							Cancel
+						</button>
+						<button
+							onClick={handleUpdate}
+							className="bg-green-500 text-white px-4 py-2 rounded"
+						>
+							Save
+						</button>
+						</div>
+					</div>
+				</div>
+      		)}            
 		</motion.div>
 	);
 }
