@@ -1,12 +1,15 @@
 import { motion } from "framer-motion";
+import React, { useEffect, useState, useContext } from 'react'
+import { AuthContext } from '../../context/AuthContext';
+import {isTokenExpired} from '../../context/isTokenExpired'
 import { Edit, Search, Trash2, View, TextIcon, FileDownIcon } from "lucide-react";
-import { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 import StatCard from "../common/StatCard";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Package,TrendingUp, AlertTriangle,DollarSign, EuroIcon } from 'lucide-react'
 import { getPaymentStatusLabel, getStatusBadgeClass } from "../Utils/helpers";
+
 const BookingsTable = () => {
 	const formatDate = (date) => {
 		const day = String(date.getDate()).padStart(2, '0');
@@ -28,11 +31,16 @@ const BookingsTable = () => {
 	const [endDate, setEndDate] = useState(formatDate(currentDate));
 	const [totalAmount, setTotalAmount] = useState(0);
 	const [totalBooking, setTotalBooking] = useState(0);
-  
+  const { logout } = useContext(AuthContext);
+
 	useEffect(() => {
 		// Fetch data from API
 		const token = sessionStorage.getItem('token');
 		if(!token) return;
+    if(isTokenExpired(token)){
+      console.error('Token is expired...')
+      logout()
+    }
 		const url = `${import.meta.env.VITE_API_BASE_URL}/hotel/booking`
 		const fetchData = async () => {
 		  try {

@@ -1,29 +1,26 @@
 import React, { useEffect, useState, useMemo, useContext } from 'react'
 import { Search, Settings, Plus} from "lucide-react";
 import { IoAddCircle, IoBed } from "react-icons/io5"
-import { MdMeetingRoom } from "react-icons/md";
 import {motion} from 'framer-motion'
 import { Eye } from 'lucide-react';
 import axios from 'axios';
-import { debounce } from "lodash";
-import UserRoom from './UserRoom';
 import LoadingRing from '../common/LoadingRing';
-import { isTokenExpired, handleRole } from '../../context/AuthUtil'
+import { isTokenExpired } from '../../context/AuthUtil'
 import { AuthContext } from '../../context/AuthContext';
 
-const RoomTable = ({updateMessage,bookedRom }) => {
+const CheckTable = ({updateMessage,bookedRom }) => {
     // State to hold the data, loading status, and any errors
-    const [rooms, setRoom] = useState([]);
+    const [checks, setCheck] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
-    const [roomId, setRoomId] = useState(null);
+    const [checkId, setCheckId] = useState(null);
     const [filtered, setFiltered] = useState([]);
     const [filteredData, setFilteredData] = useState([]); // Store filtered data
     const [isDelete, setIsDelete] = useState(false);
     const [selectedRow, setSelectedRow] = useState(null);
-    const[selectedRoom, setSelectedRoom] = useState(null);
-    const[showRoomsTable, setShowRoomsTable]= useState(true);
+    const[selectedCheck, setSelectedCheck] = useState(null);
+    const[showChecksTable, setShowChecksTable]= useState(true);
     const [register, setRegister] = useState(false);
     const [editRowId, setEditRow] = useState(null);
     const[showModal, setShowModal] = useState(false);
@@ -34,43 +31,23 @@ const RoomTable = ({updateMessage,bookedRom }) => {
       bed_size: "",
       floorNo: "",
       number_bed: "",
-      room_category: "",
+      check_category: "",
       view:"",
       price:"",
       currency:"",
-      room_desc:"",
-      room_num:"",
+      check_desc:"",
+      check_num:"",
       branch_id:1
     });
     const [buttons] = useState([
       {
         id: 1,
         allowed: ['ADMIN', 'SUPER_ADMIN', 'MANAGER'],
-        label: "Add new Room",
+        label: "Add new Check",
         disabled: false,
         icon: <IoAddCircle size={18}/>,
-        onClick: ()=> updateMessage("newRoom"),
+        onClick: ()=> updateMessage("newCheck"),
       },
-     // This will be used again in Case we will need more Functionalities in Rooms 
-     // so far there is no need.
-
-      // {
-      
-      //   id: 2,
-      //   label: "Booked Rooms",
-      //   disabled: false,
-      //   icon: <MdMeetingRoom/>,
-      //   onClick:() => updateMessage("bookedRooms"),
-      // },
-      // {
-      //   id: 3,
-      //   label: "Available Rooms",
-      //   icon: <MdMeetingRoom size={25} />,
-      //   disabled: false,
-      //   onClick: () => {
-      //     updateMessage("availableRooms")
-      //   },
-      // }
     ]);
     // Fetch data when the component mounts
   useEffect(() => {
@@ -83,10 +60,9 @@ const RoomTable = ({updateMessage,bookedRom }) => {
       console.error('Token is expired...')
       logout()
     }
-    const user = handleRole()
-    setRole(user.role)
+    handleRole()
     // Define the URL of the API
-    const url = `${import.meta.env.VITE_API_BASE_URL}/hotel/room`;
+    const url = `${import.meta.env.VITE_API_BASE_URL}/api/checkIn`;
     // Fetch data
     fetch(url, {
             method: "GET",
@@ -98,12 +74,12 @@ const RoomTable = ({updateMessage,bookedRom }) => {
       .then((response) => {
         console.log(response)
         if (!response.ok) {
-          throw new Error('Network response was not ok---');
+          throw new Error('Network response was not ok---'+response.status);
         }
         return response.json();
       })
       .then((data) => {
-        setRoom(data);  // Store the fetched data
+        setCheck(data);  // Store the fetched data
         setLoading(false);  // Set loading to false once the data is fetched
       })
       .catch((error) => {
@@ -112,46 +88,51 @@ const RoomTable = ({updateMessage,bookedRom }) => {
         console.log(error.message)
       });
   }, []);
-  
+  const handleRole=()=>{
+      const userObj = sessionStorage.getItem('user');
+      if(!userObj) return;
+      const user = JSON.parse(userObj);
+      setRole(user.role)
+  }
    // Empty dependency array means it runs once when the component mounts
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
-    const filtered = rooms.filter(
-        (room) => room.room_category.toLowerCase().includes(term) || room.room_desc.toLowerCase().includes(term)
+    const filtered = checks.filter(
+        (check) => check.check_category.toLowerCase().includes(term) || check.check_desc.toLowerCase().includes(term)
     );
-    setRoom(filtered);
+    setCheck(filtered);
     setLoading(false)
 };
   // Delete Function
-  const handleDelete = async (roomId) => {
-    const confirmDelete = window.confirm(`Are you sure you want to delete Room with Room Number ${roomId}?`);
+  const handleDelete = async (checkId) => {
+    const confirmDelete = window.confirm(`Are you sure you want to delete Check with Check Number ${checkId}?`);
     if(confirmDelete){
-    if (!roomId) return;
+    if (!checkId) return;
 
     try {
       const token = sessionStorage.getItem('token');
       if(!token) return;
-      await fetch(`${import.meta.env.VITE_API_BASE_URL}/hotel/room/${roomId}`, {
+      await fetch(`${import.meta.env.VITE_API_BASE_URL}/hotel/check/${checkId}`, {
         method: "DELETE",
-				headers: {
-					"Authorization": `Bearer ${JSON.parse(token)}`,
-					"Content-Type": "application/json",  // if you're sending JSON
-				}
+                headers: {
+                    "Authorization": `Bearer ${JSON.parse(token)}`,
+                    "Content-Type": "application/json",  // if you're sending JSON
+                }
       });
 
       // Update State After Deletion
-    setRoom(rooms.filter((item)=> item.id !== roomId))
+    setCheck(checks.filter((item)=> item.id !== checkId))
     } catch (error) {
       console.error("Error deleting item:", error);
     }
   }};
 const clickEdit =()=>{
-    updateMessage("editRoom")
+    updateMessage("editCheck")
 }
-const handleView = (room) => {
-  setSelectedRow(room);
-  setShowRoomsTable(false);
+const handleView = (check) => {
+  setSelectedRow(check);
+  setShowChecksTable(false);
 }
 
 const handleUpdate = async () => {
@@ -159,25 +140,25 @@ const handleUpdate = async () => {
     const token = sessionStorage.getItem('token')
     if(!token) return;
     await axios.put(
-      `${import.meta.env.VITE_API_BASE_URL}/hotel/room/${selectedRoom.id}`,{
+      `${import.meta.env.VITE_API_BASE_URL}/hotel/check/${selectedCheck.id}`,{
         headers: {
-					Authorization: `Bearer ${JSON.parse(token)}`
-				}
+                    Authorization: `Bearer ${JSON.parse(token)}`
+                }
       },
       formData
     );
 
-    const newData = rooms.map((u) =>
-      u.id === selectedRoom.id ? { ...u, ...formData } : u
+    const newData = checks.map((u) =>
+      u.id === selectedCheck.id ? { ...u, ...formData } : u
     );
-    setRoom(newData);
+    setCheck(newData);
     closeModal();
   } catch (err) {
     console.error("Update error:", err);
   }
 };
 const closeModal = () => {
-  setSelectedRoom(null);
+  setSelectedCheck(null);
   setFormData(
     {
       id:"",
@@ -185,20 +166,20 @@ const closeModal = () => {
       bed_size: "",
       floorNo: "",
       number_bed: "",
-      room_category: "",
+      check_category: "",
       view:"",
       price:"",
       currency:"",
-      room_desc:"",
-      room_num:"",
+      check_desc:"",
+      check_num:"",
       branch_id:1
     }
   );
   setShowModal(false);
-  setShowRoomsTable(true);
+  setShowChecksTable(true);
 };
 const openEditModal = (row) => {
-  setSelectedRoom(row);
+  setSelectedCheck(row);
   setFormData(
     {
       id:row.id,
@@ -206,21 +187,21 @@ const openEditModal = (row) => {
       bed_size: row.bed_size,
       floorNo: row.floorNo,
       number_bed: row.number_bed,
-      room_category: row.room_category,
+      check_category: row.check_category,
       view:row.view,
       price:row.price,
       currency:row.currency,
-      room_desc:row.room_desc,
+      check_desc:row.check_desc,
       branch_id:row.branch_id,
-      room_num:row.room_num
+      check_num:row.check_num
     }
   );
   setShowModal(true);
-  setShowRoomsTable(false)
+  setShowChecksTable(false)
 };
 const handleClose= () => {
   setSelectedRow(null);
-  setShowRoomsTable(true);
+  setShowChecksTable(true);
 }
 
   // Render loading, error, or data depending on the state
@@ -233,13 +214,13 @@ const handleClose= () => {
   }
   return (
     <motion.div
-			className='bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700'
-			initial={{ opacity: 0, y: 20 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ delay: 0.4 }}
-		>
+            className='bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700'
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+        >
 
-			<div className='flex justify-between items-end mb-6'>
+            <div className='flex justify-between items-end mb-6'>
       <div className='flex gap-4 p-6'>
         {buttons.map((btn) => (<>
         {(role && btn.allowed.includes(role)) &&<motion.button
@@ -256,20 +237,20 @@ const handleClose= () => {
       ))}
     </div>
         <div className='relative'>
-					<input
-						type='text'
-						placeholder='Search room...'
-						className='bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
-						value={searchTerm}
-						onChange={handleSearch}
-					/>
-					<Search className='absolute left-3 top-2.5 text-gray-400' size={18} />
-				</div>
+                    <input
+                        type='text'
+                        placeholder='Search check...'
+                        className='bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                        value={searchTerm}
+                        onChange={handleSearch}
+                    />
+                    <Search className='absolute left-3 top-2.5 text-gray-400' size={18} />
+                </div>
         </div>
         {selectedRow && (
           <div className="mt-4 p-4 border rounded">
-          <h3 className="text-lg font-semibold mb-2">{`Information about ${selectedRow.room_desc}`}</h3>
-          <p><strong>Room Description:</strong> {selectedRow.room_desc}</p>
+          <h3 className="text-lg font-semibold mb-2">{`Information about ${selectedRow.check_desc}`}</h3>
+          <p><strong>Check Description:</strong> {selectedRow.check_desc}</p>
           <p><strong>Price:</strong> {selectedRow.price}</p>
           <button
             onClick={handleClose}
@@ -282,97 +263,114 @@ const handleClose= () => {
       )}
 
     
-			<div className='overflow-x-auto'>
-      {showRoomsTable && 
-				<table className='min-w-full divide-y divide-gray-700'>
-					<thead>
-						<tr>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
-								Room id
-							</th>
+            <div className='overflow-x-auto'>
+      {showChecksTable && 
+                <table className='min-w-full divide-y divide-gray-700'>
+                    <thead>
+                        <tr>
+                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
+                                Check id
+                            </th>
               <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
-								Room Number
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
-							Room Description
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
-              Room Category
-							</th>
-              <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
-								Number Beds
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
-								Actions
-							</th>
-						</tr>
-					</thead>
-
-					<tbody className='divide divide-gray-700'>
-						{rooms.map((room) => (
-							<motion.tr
-              // className='hover:bg-amber-950'
-								key={room.id}
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								transition={{ duration: 0.3 }}
-							>
-								<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
-                    {room.id}
-									
-								</td>
-                <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
-                    {room.room_num}
-									
-								</td>
-                <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
-                    {room.room_desc}
-							
-								</td>
-                <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
-                    {room.room_category}
-							
-								</td>
-                <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
-                    {room.number_bed}
-							
-								</td>
-								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
+                              Names
+                            </th>
+                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
+                              Passport
+                            </th>
+                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
+                              Email
+                            </th>
+                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
+                              Phone
+                            </th>
+                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
+                              Check-in
+                            </th>
+                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
+                              Check-out
+                            </th>
+                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
+                              Nationality
+                            </th>
+                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
+                              Date of birth
+                            </th>
+                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
+                              City
+                            </th>
+                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
+                              Street
+                            </th>
+                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
+                              Country
+                            </th>
+                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
+                              Post Code
+                            </th>
+                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 tracking-wider'>
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody className='divide divide-gray-700'>
+                        {checks.map((check) => (
+                            <motion.tr
+                                key={check.id}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.3 }}
+                            >
+                            <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.id}</td>
+                            <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>
+                              {check.first_name}  {check.last_name}
+                            </td>
+                            <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.passport_number}</td>
+                            <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.email}</td>
+                            <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.phone}</td>
+                            <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.nationality}</td>
+                            <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.checking_in_date}</td>
+                            <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.checking_out_date}</td>
+                            <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.date_birth_customer}</td>
+                            <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.city}</td>
+                            <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.street}</td>
+                            <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.country}</td>
+                            <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.post_code}</td>
+                            <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
                   <button
-                    onClick={() => openEditModal(room)}
+                    onClick={() => openEditModal(check)}
                     className="bg-blue-500 text-white px-3 mr-4 py-1 rounded"
                   >
                     Edit
                   </button>
-                  <button className='bg-amber-500 text-blue-700 hover:text-cyan-700  px-3 py-1 rounded' onClick={()=> handleView(room)}>View</button>
+                  <button className='bg-amber-500 text-blue-700 hover:text-cyan-700  px-3 py-1 rounded' onClick={()=> handleView(check)}>View</button>
                   <button className='text-red-500 hover:text-red-300 mr-4 px-3 py-1 rounded'
-                  onClick={() => handleDelete(room.id)}>Delete</button>
-								</td>
-							</motion.tr>
-						))}
-					</tbody>
-				</table>
+                  onClick={() => handleDelete(check.id)}>Delete</button>
+                                </td>
+                            </motion.tr>
+                        ))}
+                    </tbody>
+                </table>
      }
         {/* Edit Modal */}
       {showModal && (
         <div className="bg-gray-800 bg-opacity-50 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-gray-800 bg-opacity-50 bg-opacity-50 rounded-xl p-6 w-full max-w-md shadow-lg">
-            <h3 className="text-lg font-bold mb-4">Edit Room</h3>
+            <h3 className="text-lg font-bold mb-4">Edit Check</h3>
             <div className="space-y-4">
             <div>
-                <label className="block mb-1 text-sm font-medium">Room Number</label>
+                <label className="block mb-1 text-sm font-medium">Check Number</label>
                 <input
                       type="text"
-                      name="room_num"
-                      value={formData.room_num}
+                      name="check_num"
+                      value={formData.check_num}
                       onChange={(e) =>
-                        setFormData({ ...formData, room_num: e.target.value })
+                        setFormData({ ...formData, check_num: e.target.value })
                       }
                       className="border p-2 w-full rounded"
                     />
               </div>
               <div>
-                <label className="block mb-1 text-sm font-medium">Room Size</label>
+                <label className="block mb-1 text-sm font-medium">Check Size</label>
                 <input
                       type="text"
                       name="size"
@@ -432,25 +430,25 @@ const handleClose= () => {
                     />
               </div>
               <div>
-                <label className="block mb-1 text-sm font-medium">Room Category</label>
+                <label className="block mb-1 text-sm font-medium">Check Category</label>
                 <input
                       type="text"
-                      name="room_category"
-                      value={formData.room_category}
+                      name="check_category"
+                      value={formData.check_category}
                       onChange={(e) =>
-                        setFormData({ ...formData, room_category: e.target.value })
+                        setFormData({ ...formData, check_category: e.target.value })
                       }
                       className="border p-2 w-full rounded"
                     />
               </div>
               <div>
-                <label className="block mb-1 text-sm font-medium">Room Description</label>
+                <label className="block mb-1 text-sm font-medium">Check Description</label>
                 <input
                       type="text"
-                      name="room_desc"
-                      value={formData.room_desc}
+                      name="check_desc"
+                      value={formData.check_desc}
                       onChange={(e) =>
-                        setFormData({ ...formData, room_desc: e.target.value })
+                        setFormData({ ...formData, check_desc: e.target.value })
                       }
                       className="border p-2 w-full rounded"
                     />
@@ -509,9 +507,9 @@ const handleClose= () => {
           </div>
         </div>
       )}
-			</div>
-		</motion.div>
+            </div>
+        </motion.div>
   )
 }
 
-export default RoomTable
+export default CheckTable

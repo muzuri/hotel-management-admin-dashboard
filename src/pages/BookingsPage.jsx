@@ -11,7 +11,7 @@ import SalesTrendCharts from '../components/overview/SalesTrendCharts'
 const BookingsPage = () => {
   return (
     <div className='flex-1 overflow-auto relative z-10'>
-        <Header title= "Overview"></Header>
+        <Header title= "Bookings"/>
         <main className='max-w-7xl mx-auto py-6 px-4 lg:px-8'>
           {/* STAT */}
     

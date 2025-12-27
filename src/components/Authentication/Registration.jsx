@@ -7,54 +7,59 @@ import axios from 'axios'
 
 
 const Registration = () => {
-    const [showPassword, setShowPassword] = useState(true);
+    const [showPassword, setShowPassword] = useState(false);
+    const [registered, setRegistered] = useState(false);
 
     const {
         register,
         handleSubmit,
+        setValue,
+        reset,
         formState: { errors },
       } = useForm()
-
-      // Helper: Check if user is 18+
-      const isAdult = (dateString) => {
-        const today = new Date();
-        const dob = new Date(dateString);
-        const age = today.getFullYear() - dob.getFullYear();
-        const m = today.getMonth() - dob.getMonth();
-        return (
-          age > 18 || (age === 18 && m >= 0 && today.getDate() >= dob.getDate())
-        );
-      };
     
 const onSubmit = async (data) =>{
     try{
-        const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/hotel/public/register`, data);
-        console.log('Login success:', response.data);
+      setValue("marital_status", "Married")
+      const token = sessionStorage.getItem('token');
+      if(!token) throw new Error("No token");     
+      const config = {
+          headers: {
+            "Authorization": `Bearer ${JSON.parse(token)}`,
+					  "Content-Type": "application/json",
+        }
+      };
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/hotel/user/register`, data, config);
+      console.log('Login success:', response.data);
+      setRegistered(true)
+      reset();
     }
-    catch(error ){
+    catch(error){
         console.log(error)
     }
    
 }
   return (
     <motion.div
-    className='bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700 mb-8'
+    className='bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 m-3 border border-gray-700 mb-8'
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: 0.2 }}
   >
-     <h1 className='text-2xl font-bold text-gra100'>Registration Form</h1>
+     <h1 className='text-2xl font-bold text-gra100'>Add user</h1>
+    {registered && <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
+      <span class="font-medium">User</span> registered.
+    </div>}
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
         <div className="input-wrapper flex flex-col">
-          <input
-          className={`border p-2 w-full rounded focus:outline-none 
+          <input className={`border p-2 w-full rounded focus:outline-none 
             ${errors.first_name ? 'border-red-500': 'border-gray-500'}`}
            placeholder='First Name'
             type="text"
             {...register('first_name', {
               required: 'First Name is required',
               minLength: {
-                value: 2,
+                value: 1,
                 message: 'First Name must be at least 2 characters',
               },
             })}
@@ -63,34 +68,8 @@ const onSubmit = async (data) =>{
             <p className="text-xs italic text-red-600">{errors.first_name.message}</p>
           )}
         </div>
-        {
-// "first_name": "Muzuri",
-// "last_name": "Aimable",
-// "password":"Jesus123!@",
-// "marital_status":"Maried",
-// "email":"muzuri31@gmail.com",
-// "role":"MANAGER",
-// "gender": "Male",
-// "date_birth":"2027-06-29",
-// "phone_number":"015210563098887",
-// "created_by":"Aima",
-// "updated_by":"Akaliza"
- }
-<div className='input wrapper flex flex-col'>
-<select
-  {...register("marital_status", { required: true })}
-  className="w-full p-2 border border-gray-300 rounded"
->
-  <option value="">Select Marital Staus</option>
-  <option value="maried">Maried</option>
-  <option value="single">Single</option>
-  <option value="other">Divorced</option>
-</select>
-{errors.marital_status && <p className="text-red-500 text-sm">Status is required.</p>}
-        </div>
         <div className="input-wrapper flex flex-col">
-          <input
-          className={`border p-2 w-full rounded focus:outline-none 
+          <input className={`border p-2 w-full rounded focus:outline-none 
             ${errors.last_name ? 'border-red-500':'border-gray-500'}` 
           }
         
@@ -99,16 +78,15 @@ const onSubmit = async (data) =>{
           {...register('last_name',{
             required: 'Last Name is required',
             minLength: {
-              value: 2,
+              value: 1,
               message: 'First Name should be at least two characters'
             }
           })}/>
           {errors.last_name && <p className='text-xs italic text-red-500'>{errors.last_name.message}</p>}
         </div>
-
+        <input className='hidden' {...register("marital_status")} />
         <div className="input-wrapper flex flex-col"> 
-          <input
-          className={`border p-2 w-full rounded focus:outline-none 
+          <input className={`border p-2 w-full rounded focus:outline-none 
             ${errors.email ? 'border-red-500': 'border-gray-500'}`}
             type="email"
             placeholder='Email'
@@ -120,37 +98,47 @@ const onSubmit = async (data) =>{
               },
             })}
           />
-          {errors.email && <p className="text-xs italic text-red-500">
-            {errors.email.message}</p>}
+          {errors.email && <p className="text-xs italic text-red-500">{errors.email.message}</p>}
+        </div>
+        <div className="input-wrapper flex flex-col"> 
+          <input className={`border p-2 w-full rounded focus:outline-none 
+            ${errors.phone_number ? 'border-red-500': 'border-gray-500'}`}
+            type="phone"
+            placeholder='Phone'
+            {...register('phone_number', {
+              required: 'Phone is required',
+              pattern: {
+                value: /^\s*(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})(?: *x(\d+))?\s*$/i,
+                message: 'Invalid Phone Number',
+              },
+            })}
+          />
+          {errors.phone_number && <p className="text-xs italic text-red-500">{errors.phone_number.message}</p>}
         </div>
 
         <div className='input wrapper flex flex-col'>
           <select
-          {
-           ...register("gender", { required: true })}
-          className="w-full p-2 border border-gray-300 rounded"
-          >
-            <option value="">Select gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
+          {...register("gender", { required: true })}
+          className={`border p-2 w-full rounded focus:outline-none 
+            ${errors.gender ? 'border-red-500': 'border-gray-500'}`}>
+              <option className="bg-cyan-500" value="">Select gender</option>
+              <option className="bg-cyan-500" value="male">Male</option>
+              <option className="bg-cyan-500" value="female">Female</option>
             </select>
-            {
-            errors.gender && <p className="text-red-500 text-sm">Gender is required.</p>}
+            {errors.gender && <p className="text-xs italic text-red-500">Gender is required.</p>}
         </div>
 
         <div style={{ position: 'relative' }}>
-          <input
-          className={`border p-2 w-full rounded 
+          <input className={`border p-2 w-full rounded 
             ${errors.password ? 'border-red-500':'border-gray-500'}`}
            style={{ width: '100%', paddingRight: '60px' }}
            placeholder='Password'
             type={showPassword? 'text': 'password'}
             {...register('password', {
               required: 'Password is required',
-              minLength: {
-                value: 8,
-                message: 'Password must be at least 8 characters',
-                
+              pattern: {
+                value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/i,
+                message: 'Password must be Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character',
               },
             })}
           />
@@ -172,23 +160,47 @@ const onSubmit = async (data) =>{
             <p className="text-xs italic text-red-500">{errors.password.message}</p>
           )}
         </div>
-        <div>
-        <label className="block text-sm font-medium text-white mb-1">Date of Birth</label>
-        <input
-          type="date"
-          {...register("date_birth", { 
-            required: 'Date of birth is required.',
-            validate: value => isAdult(value) || "You must be at least 18 years old."
-           })}
-          className="w-full p-2 border border-gray-300 rounded"
-        />
-         {errors.dob && (
-  <p className="text-red-500 text-sm">
-    {errors.date_birth.message || "Invalid date of birth."}
-  </p>
-)}
-      </div>
-
+        <div style={{ position: 'relative' }}>
+          <input className={`border p-2 w-full rounded 
+            ${errors.password ? 'border-red-500':'border-gray-500'}`}
+           style={{ width: '100%', paddingRight: '60px' }}
+           placeholder='Verify Password'
+            type={showPassword? 'text': 'password'}
+            {...register('vpassword', {
+              required: 'Password is required',
+            })}
+          />
+          <span
+          onClick={() => setShowPassword((prev) => !prev)}
+          style={{
+            position: 'absolute',
+            right: '10px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            cursor: 'pointer',
+            color: 'white',
+            fontSize: '14px',
+          }}
+        >
+          {showPassword ? <EyeOff size={20}/> : <Eye size={20}/> }
+        </span>
+          {errors.vpassword && (
+            <p className="text-xs italic text-red-500">{errors.vpassword.message}</p>
+          )}
+        </div>
+        <div className='input wrapper flex flex-col'>
+          <select
+            {...register("role", { required: true })}
+            className={`border p-2 w-full rounded focus:outline-none 
+            ${errors.role ? 'border-red-500': 'border-gray-500'}`}>
+            <option className="bg-cyan-500" value="">--------------Select role--------------</option>
+            <option className="bg-cyan-500" value="ADMIN">Admin</option>
+            <option className="bg-cyan-500" value="SUPER_ADMIN">Super admin</option>
+            <option className="bg-cyan-500" value="MANAGER">Manager</option>
+            <option className="bg-cyan-500" value="RECEPTION">Receptionist</option>
+          </select>
+          {errors.role && <p className="text-xs italic text-red-500">Status is required.</p>}
+        </div>
         <div className="input-wrapper">
           <button
             type="submit"
