@@ -327,10 +327,10 @@ const handleClose= () => {
                             <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.passport_number}</td>
                             <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.email}</td>
                             <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.phone}</td>
-                            <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.nationality}</td>
                             <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.checking_in_date}</td>
                             <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.checking_out_date}</td>
                             <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.date_birth_customer}</td>
+                            <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.nationality}</td>
                             <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.city}</td>
                             <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.street}</td>
                             <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100'>{check.country}</td>
