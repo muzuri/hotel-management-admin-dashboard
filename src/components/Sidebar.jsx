@@ -80,7 +80,7 @@ function Sidebar() {
                 </motion.button>
                 <nav className='mt-8 flex-grow'>
                     {SIDEBAR_ITEMS.map((item, index)=>(
-                       <>
+                       <React.Fragment key={item.href}>
                         {(role && item.allowed.includes(role)) &&
                         <Link key={item.href} to={item.href}>
                             <motion.div
@@ -100,7 +100,7 @@ function Sidebar() {
                                     )}
                                 </AnimatePresence>
                             </motion.div>
-                        </Link>}</> 
+                        </Link>}</React.Fragment>
                     ))}
                     
                     <Link key={'/logout'} to={'/logout'}>
