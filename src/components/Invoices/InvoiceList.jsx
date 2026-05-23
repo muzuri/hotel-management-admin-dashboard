@@ -1,11 +1,18 @@
 import { useState, useEffect } from "react";
-import { Search, Eye, FileDown, X } from "lucide-react";
+import { Search, Eye, FileDown, X, Trash2 } from "lucide-react";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
 // --- shared helpers ---
 function parseDE(str) {
   return parseFloat((str || "0").replace(/\./g, "").replace(",", ".")) || 0;
+}
+// handles both German format ("91.936,00") and plain decimal ("14.95")
+function parseAmount(str) {
+  if (str == null) return 0;
+  const s = String(str);
+  if (s.includes(",")) return parseDE(s);
+  return parseFloat(s) || 0;
 }
 function formatDE(num) {
   return num.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -22,17 +29,21 @@ function calcItem(item) {
   return parseDE(item.menge) * parseDE(item.preis);
 }
 function calcTotals(items) {
-  const netto = (items || []).reduce((sum, it) => sum + calcItem(it), 0);
   const groups = {};
   (items || []).forEach((it) => {
     const rate = it.ust;
-    const base = calcItem(it);
+    const nettoLine = calcItem(it);
     if (!groups[rate]) groups[rate] = 0;
-    groups[rate] += base;
+    groups[rate] += nettoLine;
   });
+  let netto = 0;
   let ustGesamt = 0;
   const ustLines = Object.entries(groups).map(([rate, base]) => {
-    const tax = base * (parseFloat(rate) / 100);
+    const rateNum = parseFloat(rate);
+    // backend stores netto; brutto = netto × (1 + rate/100)
+    const brutto = base * (1 + rateNum / 100);
+    const tax = brutto - base;
+    netto += base;
     ustGesamt += tax;
     return { rate, base, tax };
   });
@@ -67,21 +78,27 @@ function normalizeInvoice(inv) {
     registergericht: inv.issuer?.registergericht ?? "",
     steuernummer: inv.issuer?.steuernummer ?? "",
   };
+  const items = (inv.items ?? []).map((it) => ({
+    id: it.id,
+    menge: parseFloat(it.menge ?? 0).toFixed(2).replace(".", ","),
+    produkt: it.produkt ?? "",
+    ust: String(parseFloat(it.ust ?? 0)),
+    preis: String(parseFloat(it.preis ?? 0)).replace(".", ","),
+  }));
+  // prefer API-provided totals; fall back to recalculating from items
+  const apiGesamt = inv.totalAmount != null ? parseAmount(inv.totalAmount) : null;
+  const apiNetto = inv.totalNetAmount != null ? parseAmount(inv.totalNetAmount) : null;
+  const apiUstGesamt = inv.ustgesamt != null ? parseAmount(inv.ustgesamt) : null;
+  const calculated = calcTotals(items);
+  const gesamt = apiGesamt ?? calculated.gesamt;
   const invoice = {
     date: inv.rechnungDatum ?? "",
     nummer: inv.rechnungNummer ?? "",
     checkIn: inv.checkIn ?? "",
     checkOut: inv.checkOut ?? "",
     zahlungsfrist: inv.paid ? null : (inv.zahlungsfrist ?? ""),
+    gesamt: formatDE(gesamt),
   };
-  const items = (inv.items ?? []).map((it) => ({
-    id: it.id,
-    menge: parseFloat(it.menge ?? 0).toFixed(2).replace(".", ","),
-    produkt: it.produkt ?? "",
-    ust: String(parseFloat(it.ust ?? 0)),
-    preis: parseFloat(it.preis ?? 0).toFixed(2).replace(".", ","),
-  }));
-  const { gesamt } = calcTotals(items);
   return {
     id: inv.id,
     customer,
@@ -89,14 +106,20 @@ function normalizeInvoice(inv) {
     company,
     invoice,
     items,
-    totals: { gesamt: formatDE(gesamt) },
+    totals: {
+      gesamt: formatDE(gesamt),
+      netto: apiNetto != null ? apiNetto : calculated.netto,
+      ustGesamt: apiUstGesamt != null ? apiUstGesamt : calculated.ustGesamt,
+    },
   };
 }
 
 // --- InvoicePreview (mirrors generatePDF layout) ---
 function InvoicePreview({ data }) {
-  const { customer, company, invoice, items } = data;
-  const { netto, ustLines, ustGesamt, gesamt } = calcTotals(items);
+  const { customer, company, invoice, items, totals } = data;
+  const { ustLines } = calcTotals(items); // only for per-rate breakdown; totals come from API
+  const netto = totals.netto;
+  const ustGesamt = totals.ustGesamt;
 
   return (
     <div
@@ -166,7 +189,7 @@ function InvoicePreview({ data }) {
               <td style={{ padding: "3px 6px" }}>{it.menge}</td>
               <td style={{ padding: "3px 6px" }}>{it.produkt}</td>
               <td style={{ padding: "3px 6px" }}>{it.ust}%</td>
-              <td style={{ padding: "3px 6px" }}>{it.preis} €</td>
+              <td style={{ padding: "3px 6px" }}>{formatDE(parseDE(it.preis))} €</td>
               <td style={{ padding: "3px 6px" }}>{formatDE(calcItem(it))} €</td>
             </tr>
           ))}
@@ -198,7 +221,7 @@ function InvoicePreview({ data }) {
           </tr>
         </tbody>
       </table>
-      <div style={{ marginBottom: 20 }}>Gesamtbetrag: {formatDE(gesamt)} €</div>
+      <div style={{ marginBottom: 20 }}>Gesamtbetrag: {invoice.gesamt} €</div>
 
       {invoice.zahlungsfrist && (
         <div style={{ fontWeight: "bold", marginBottom: 8 }}>
@@ -226,8 +249,10 @@ function InvoicePreview({ data }) {
 
 // --- PDF generator (mirrors InvoicePreview layout) ---
 async function generatePDF(inv) {
-  const { customer, company, invoice, items } = inv;
-  const { netto, ustLines, ustGesamt, gesamt } = calcTotals(items);
+  const { customer, company, invoice, items, totals } = inv;
+  const { ustLines } = calcTotals(items); // only for per-rate breakdown; totals come from API
+  const netto = totals.netto;
+  const ustGesamt = totals.ustGesamt;
   const doc = new jsPDF();
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
@@ -340,7 +365,7 @@ async function generatePDF(inv) {
 
   doc.setFont("courier", "normal");
   doc.setFontSize(10);
-  doc.text(`Gesamtbetrag: ${formatDE(gesamt)} €`, 14, y);
+  doc.text(`Gesamtbetrag: ${invoice.gesamt} €`, 14, y);
   y += 8;
 
   if (invoice.zahlungsfrist) {
@@ -381,6 +406,28 @@ const InvoiceList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selected, setSelected] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null); // holds invoice to delete
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = () => {
+    if (!confirmDelete) return;
+    const token = sessionStorage.getItem("token");
+    setDeleting(true);
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/hotel/invoice/${confirmDelete.id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${JSON.parse(token)}` } : {}),
+      },
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error(`Server error: ${r.status}`);
+        setInvoices((prev) => prev.filter((inv) => inv.id !== confirmDelete.id));
+        setConfirmDelete(null);
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setDeleting(false));
+  };
 
   useEffect(() => {
     const token = sessionStorage.getItem("token");
@@ -462,7 +509,7 @@ const InvoiceList = () => {
                     <td className="px-4 py-3 text-gray-100 font-medium">{inv.invoice?.nummer ?? "—"}</td>
                     <td className="px-4 py-3 text-gray-300">{inv.customer?.name ?? "—"}</td>
                     <td className="px-4 py-3 text-gray-300">{isoToDE(inv.invoice?.date) ?? "—"}</td>
-                    <td className="px-4 py-3 text-gray-100 font-semibold">{inv.totals?.gesamt ?? "—"} €</td>
+                    <td className="px-4 py-3 text-gray-100 font-semibold">{inv.invoice?.gesamt ?? "—"} €</td>
                     <td className="px-4 py-3">
                       {inv.invoice?.zahlungsfrist
                         ? <span className="text-gray-300">{isoToDE(inv.invoice.zahlungsfrist)}</span>
@@ -485,6 +532,13 @@ const InvoiceList = () => {
                         >
                           <FileDown size={17} />
                         </button>
+                        <button
+                          onClick={() => setConfirmDelete(inv)}
+                          className="text-red-400 hover:text-red-300 transition-colors"
+                          title="Delete Invoice"
+                        >
+                          <Trash2 size={17} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -494,6 +548,35 @@ const InvoiceList = () => {
           </div>
         )}
       </div>
+
+      {/* Delete confirmation modal */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-sm mx-4 shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-100 mb-2">Delete Invoice</h3>
+            <p className="text-gray-400 text-sm mb-6">
+              Are you sure you want to delete invoice{" "}
+              <span className="text-white font-medium">{confirmDelete.invoice?.nummer}</span>? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                disabled={deleting}
+                className="px-4 py-1.5 rounded-lg text-sm text-gray-300 hover:text-white border border-gray-600 hover:border-gray-400 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="px-4 py-1.5 rounded-lg text-sm font-semibold bg-red-600 hover:bg-red-500 text-white transition-colors disabled:opacity-50"
+              >
+                {deleting ? "Deleting…" : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Preview modal */}
       {selected && (
@@ -531,3 +614,5 @@ const InvoiceList = () => {
 };
 
 export default InvoiceList;
+
+
