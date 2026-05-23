@@ -44,17 +44,20 @@ function calcItem(item) {
 }
 
 function calcTotals(items) {
-  const netto = items.reduce((sum, it) => sum + calcItem(it), 0);
   const groups = {};
+  let netto = 0;
   items.forEach((it) => {
-    const rate = it.ust;
-    const base = calcItem(it);
-    if (!groups[rate]) groups[rate] = 0;
-    groups[rate] += base;
+    const rate = parseFloat(it.ust) || 0;
+    const brutto = parseDE(it.menge) * parseDE(it.preis);
+    const itemNetto = brutto / (1 + rate / 100);
+    const tax = brutto - itemNetto;
+    netto += itemNetto;
+    if (!groups[it.ust]) groups[it.ust] = { base: 0, tax: 0 };
+    groups[it.ust].base += itemNetto;
+    groups[it.ust].tax += tax;
   });
   let ustGesamt = 0;
-  const ustLines = Object.entries(groups).map(([rate, base]) => {
-    const tax = base * (parseFloat(rate) / 100);
+  const ustLines = Object.entries(groups).map(([rate, { base, tax }]) => {
     ustGesamt += tax;
     return { rate, base, tax };
   });
@@ -112,6 +115,7 @@ function InvoicePreview({ data }) {
         ) : (
           <div style={{ fontWeight: "bold", fontSize: "13px" }}>{customer.name}</div>
         )}
+        {customer.taxId && <div style={{ fontSize: "10px", color: "#777" }}>Tax-ID: {customer.taxId}</div>}
         <div>{customer.strasse}</div>
         <div>{customer.plz} {customer.ort}</div>
       </div>
@@ -209,10 +213,10 @@ export default function App() {
   const [customerType, setCustomerType] = useState("individual"); // 'individual' | 'company'
 
   const [customer, setCustomer] = useState({
-    name: "", strasse: "", plz: "", ort: "",
+    name: "", taxId: "", strasse: "", plz: "", ort: "",
   });
   const [customerCo, setCustomerCo] = useState({
-    firmenname: "Company Name", guestName: "Guest Name", strasse: "", plz: "", ort: "",
+    firmenname: "Company Name", guestName: "Guest Name", taxId: "", strasse: "", plz: "", ort: "",
   });
 
   const issuerId = 1;
@@ -256,6 +260,8 @@ export default function App() {
     setSaving(true);
     setSaveStatus(null);
     const token = sessionStorage.getItem("token");
+    //     private BigDecimal totalNetAmount;
+    // private BigDecimal ustgesamt;
     const payload = {
       customerType: customerType.toUpperCase(),
       individual: customerType === "individual" ? customer : null,
@@ -264,16 +270,23 @@ export default function App() {
         date: deToIso(invoice.date),
         rechnungNummer: invoice.rechnungNummer,
         checkIn: invoice.checkIn,
+        totalAmount: formatDE(gesamt),
+        totalNetAmount: formatDE(netto),
+        ustgesamt: formatDE(ustGesamt),
         checkOut: invoice.checkOut,
         zahlungsfrist: deToIso(invoice.zahlungsfrist),
         paid,
       },
-      items: items.map(({ id, ...rest }) => ({
-        menge: parseDE(rest.menge),
-        produkt: rest.produkt,
-        ust: parseFloat(rest.ust),
-        preis: parseDE(rest.preis),
-      })),
+      items: items.map(({ id, ...rest }) => {
+        const ustRate = parseFloat(rest.ust) || 0;
+        const bruttoPreis = parseDE(rest.preis);
+        return {
+          menge: parseDE(rest.menge),
+          produkt: rest.produkt,
+          ust: ustRate,
+          preis: bruttoPreis,
+        };
+      }),
       issuerId,
     };
     try {
@@ -344,11 +357,19 @@ export default function App() {
               </div>
             </div>
 
+
+
+
+ {/* Depending on customer type, show different fields */}
             {customerType === "individual" ? (
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Full Name</label>
                   <input value={customer.name} onChange={setC("name")} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Tax ID</label>
+                  <input value={customer.taxId} onChange={setC("taxId")} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Straße & Hausnummer</label>
@@ -374,6 +395,10 @@ export default function App() {
                   <input value={customerCo.guestName} onChange={setCCo("guestName")} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                 </div>
                 <div className="col-span-2">
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Tax ID</label>
+                  <input value={customerCo.taxId} onChange={setCCo("taxId")} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                </div>
+                <div className="col-span-2">
                   <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Straße & Hausnummer</label>
                   <input value={customerCo.strasse} onChange={setCCo("strasse")} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                 </div>
@@ -388,6 +413,11 @@ export default function App() {
               </div>
             )}
           </div>
+
+
+        
+
+
 
           {/* Rechnungsdaten */}
           <div className="bg-gray-800 bg-opacity-50 backdrop-blur-lg rounded-xl p-6 border border-gray-700 shadow-lg">
@@ -421,6 +451,8 @@ export default function App() {
             </div>
           </div>
 
+
+
           {/* Positionen */}
           <div className="bg-gray-800 bg-opacity-50 backdrop-blur-lg rounded-xl p-6 border border-gray-700 shadow-lg">
             <div className="flex justify-between items-center mb-5">
@@ -437,7 +469,7 @@ export default function App() {
               <table className="w-full text-sm border-collapse">
                 <thead>
                   <tr className="border-b border-gray-600">
-                    {["Menge", "Produkt", "USt. %", "Preis (€)", "Gesamt (€)", ""].map((h) => (
+                    {["Menge", "Produkt", "USt. %", "Preis Brutto (€)", "Gesamt Brutto (€)", ""].map((h) => (
                       <th key={h} className="text-left py-2 px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
                         {h}
                       </th>
@@ -526,3 +558,4 @@ export default function App() {
     </div>
   );
 }
+
