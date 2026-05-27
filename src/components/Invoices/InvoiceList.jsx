@@ -195,33 +195,11 @@ function InvoicePreview({ data }) {
           ))}
         </tbody>
       </table>
-      <div style={{ marginBottom: 10 }}>Nettobetrag: {formatDE(netto)} €</div>
-
-      {/* USt table */}
-      <div style={{ marginBottom: 4, fontStyle: "italic" }}>zuzüglich Umsatzsteuer</div>
-      <table style={{ borderCollapse: "collapse", marginBottom: 6 }}>
-        <thead>
-          <tr style={{ borderBottom: "1px solid #999" }}>
-            {["USt. Satz", "Nettopreis", "Ust.-Betrag"].map((h) => (
-              <th key={h} style={{ textAlign: "left", padding: "2px 10px 2px 0", fontWeight: "bold", fontSize: "10px" }}>{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {ustLines.map((l) => (
-            <tr key={l.rate} style={{ borderBottom: "1px solid #ccc" }}>
-              <td style={{ padding: "2px 10px 2px 0" }}>{l.rate}%</td>
-              <td style={{ padding: "2px 10px 2px 0" }}>{formatDE(l.base)} €</td>
-              <td style={{ padding: "2px 10px 2px 0" }}>{formatDE(l.tax)} €</td>
-            </tr>
-          ))}
-          <tr>
-            <td colSpan={2} style={{ textAlign: "right", padding: "2px 10px 2px 0", fontWeight: "bold" }}>USt. Gesamt:</td>
-            <td style={{ padding: "2px 10px 2px 0" }}>{formatDE(ustGesamt)} €</td>
-          </tr>
-        </tbody>
-      </table>
-      <div style={{ marginBottom: 20 }}>Gesamtbetrag: {invoice.gesamt} €</div>
+      <div style={{ display: "flex", gap: 32, marginBottom: 10 }}>
+        <span>Nettobetrag: <strong>{formatDE(netto)} €</strong></span>
+        <span>USt. Gesamt: <strong>{formatDE(ustGesamt)} €</strong></span>
+      </div>
+      <div style={{ marginBottom: 20 }}><strong>Gesamtbetrag: {formatDE(invoice.gesamt)} €</strong></div>
 
       {invoice.zahlungsfrist && (
         <div style={{ fontWeight: "bold", marginBottom: 8 }}>
@@ -339,29 +317,8 @@ async function generatePDF(inv) {
   doc.setFont("courier", "normal");
   doc.setFontSize(9);
   doc.text(`Nettobetrag: ${formatDE(netto)} €`, 14, y);
+  doc.text(`USt. Gesamt: ${formatDE(ustGesamt)} €`, 90, y);
   y += 7;
-
-  doc.setFont("courier", "italic");
-  doc.setFontSize(8);
-  doc.text("zuzüglich Umsatzsteuer", 14, y);
-  doc.setFont("courier", "normal");
-  y += 4;
-
-  // USt table
-  const ustBody = ustLines.map((l) => [`${l.rate}%`, `${formatDE(l.base)} €`, `${formatDE(l.tax)} €`]);
-  ustBody.push(["", "USt. Gesamt:", `${formatDE(ustGesamt)} €`]);
-
-  autoTable(doc, {
-    head: [["USt. Satz", "Nettopreis", "Ust.-Betrag"]],
-    body: ustBody,
-    startY: y,
-    theme: "plain",
-    styles: { font: "courier", fontSize: 8, cellPadding: 1.5 },
-    headStyles: { fontStyle: "bold", lineWidth: { bottom: 0.2 }, lineColor: [150, 150, 150] },
-    bodyStyles: { lineWidth: { bottom: 0.1 }, lineColor: [200, 200, 200] },
-  });
-
-  y = doc.lastAutoTable.finalY + 6;
 
   doc.setFont("courier", "normal");
   doc.setFontSize(10);
