@@ -54,8 +54,8 @@ const BookingsTable = () => {
 			const result = await response.json();
 			setData(result);
 			setFilteredData(result); // Initialize filteredData with full data
-			console.log('filtered data ....')
-		    console.log(filteredData);
+			// console.log('filtered data ....')
+		    // console.log(filteredData);
 			totalRevenue(result);
 			setTotalBooking(result.length);
 		  } catch (error) {
@@ -88,7 +88,7 @@ const BookingsTable = () => {
 		// "status":null,
 		// 	"customer_id":"12","reference":"00000214","booked_by":"0","booked_beds"
 		  setFilteredData(filtered);
-		  console.log('filtered by date ....'+ JSON.stringify(filtered));
+		  //console.log('filtered by date ....'+ JSON.stringify(filtered));
 		  totalRevenue(filtered)
 		  setTotalBooking(filtered.length)
 	},[startDate, endDate, data])
@@ -273,13 +273,16 @@ const generateInvoice = async (booking) => {
   const beds = (booking.booked_beds || []).map((bed, idx) => ([
     String(idx + 1),
     bed.bed_id || "-",
-    bed.room_id || "-",
+    bed.room_category || "-",
     formatDisplayDate(bed.checking_in_date),
     formatDisplayDate(bed.checking_out_date)
   ]));
+  console.log("Beds data for invoice table:", beds);  
+  // Room details for the invoice table
+  console.log("Room details for invoice table:", booking.booked_beds.map(bed => bed.room_num));
 
   autoTable(doc, {
-    head: [["#", "Bed ID", "Room ID", "Check-in", "Check-out"]],
+    head: [["#", "Bed ID", "Room Category", "Check-in", "Check-out"]],
     body: beds.length ? beds : [["-", "-", "-", "-", "-"]],
     startY: tableStartY,
     theme: "grid",
