@@ -17,8 +17,8 @@ const BedsTable = ({updateMessage}) => {
 	const [selectedRow, setSelectedRow] = useState(null);
     const[selectedBed, setSelectedBed] = useState(null);
     const[showBedsTable, setShowBedsTable]= useState(true);
-	const[showModal, setShowModal] = useState(false);
-	const { logout } = useContext(AuthContext);
+	const[showModal, setShowModal] = useState(false);	const [currentPage, setCurrentPage] = useState(1);
+	const [rowsPerPage, setRowsPerPage] = useState(10);	const { logout } = useContext(AuthContext);
 	const [formData, setFormData] = useState({
 		size:"",
 		bed_num:"",
@@ -74,7 +74,35 @@ const BedsTable = ({updateMessage}) => {
 		item.currency.toLowerCase().includes(search.toLowerCase())
 	  );
 	  setFilteredData(filtered);
+	  setCurrentPage(1); // Reset to first page on search
 	}, [search, data]);
+	const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+
+	const handlePageChange = (pageNumber) => {
+	  setCurrentPage(pageNumber);
+	};
+
+	const handleNext = () => {
+	  if (currentPage < totalPages) {
+		setCurrentPage((prev) => prev + 1);
+	  }
+	};
+
+	const handlePrevious = () => {
+	  if (currentPage > 1) {
+		setCurrentPage((prev) => prev - 1);
+	  }
+	};
+
+	const handleRowsChange = (e) => {
+	  setRowsPerPage(parseInt(e.target.value));
+	  setCurrentPage(1); // Reset to first page on change
+	};
+
+	const paginatedData = filteredData.slice(
+	  (currentPage - 1) * rowsPerPage,
+	  currentPage * rowsPerPage
+	);
 	const closeModal = () => {
 		setSelectedBed(null);
 		setFormData(
@@ -212,6 +240,16 @@ const BedsTable = ({updateMessage}) => {
 					/>
 					<Search className='absolute left-3 top-2.5 text-gray-400' size={18} />
 				</div>
+				<select
+					value={rowsPerPage}
+					onChange={handleRowsChange}
+					className='bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+				>
+					<option value={5}>5 / page</option>
+					<option value={10}>10 / page</option>
+					<option value={25}>25 / page</option>
+					<option value={50}>50 / page</option>
+				</select>
 			</div>
             <h2 className='text-xl font-semibold text-gray-100 text-center'>Active Beds in Hotel</h2>
 			<div className='overflow-x-auto'>
@@ -262,8 +300,8 @@ const BedsTable = ({updateMessage}) => {
 					</thead>
 
 					<tbody className='divide-y divide-gray-700'>		
-          {filteredData.length > 0 ? (
-           filteredData.map((bed) => (
+          {paginatedData.length > 0 ? (
+           paginatedData.map((bed) => (
 			<motion.tr
 				key={bed.id}
 				initial={{ opacity: 0 }}
@@ -319,6 +357,39 @@ const BedsTable = ({updateMessage}) => {
 }
 
 			</div>
+			{showBedsTable && totalPages > 0 && (
+				<div className="flex justify-between items-center mt-4">
+					<button
+						onClick={handlePrevious}
+						disabled={currentPage === 1}
+						className="px-3 py-1 bg-blue-700 rounded disabled:opacity-50"
+					>
+						Previous
+					</button>
+
+					<div className="space-x-1">
+						{[...Array(totalPages).keys()].map((number) => (
+							<button
+								key={number}
+								onClick={() => handlePageChange(number + 1)}
+								className={`px-3 py-1 border rounded ${
+									currentPage === number + 1 ? 'bg-blue-500 text-green-950' : 'bg-green-950'
+								}`}
+							>
+								{number + 1}
+							</button>
+						))}
+					</div>
+
+					<button
+						onClick={handleNext}
+						disabled={currentPage === totalPages}
+						className="px-3 py-1 bg-blue-700 rounded disabled:opacity-50"
+					>
+						Next
+					</button>
+				</div>
+			)}
 			{showModal && (
         <div className="bg-gray-800 bg-opacity-50 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-gray-800 bg-opacity-50 bg-opacity-50 rounded-xl p-6 w-full max-w-md shadow-lg">
