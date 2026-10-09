@@ -319,7 +319,7 @@ const generateInvoice = async (booking) => {
     doc.setFontSize(9);
     doc.text(footerText, pageWidth / 2, pageHeight - 10, { align: "center" });
     doc.setFontSize(9);
-    doc.text("Xenon Hostel UG • bookings@xenonhostel.com", pageWidth - 14, pageHeight - 10, { align: "right" });
+    doc.text("Xenon Hostel UG • booking@xenonhostel.com", pageWidth - 14, pageHeight - 10, { align: "right" });
   }
 
   doc.save(`Invoice_${safeRef}.pdf`);
