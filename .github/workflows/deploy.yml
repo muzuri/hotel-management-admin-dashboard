@@ -2,9 +2,9 @@ name: Build and Deploy Admin Dashboard
 
 on:
   push:
-    branches: [ main, dev ]
-  pull_request:
-    branches: [ main, dev ]
+    branches: [ main ]
+  # pull_request:
+  #   branches: [ main, dev ]
 
 env:
   REGISTRY: ghcr.io
