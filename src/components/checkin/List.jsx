@@ -25,6 +25,8 @@ const CheckTable = ({updateMessage,bookedRom }) => {
     const [editRowId, setEditRow] = useState(null);
     const[showModal, setShowModal] = useState(false);
     const[role, setRole] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
     const { logout } = useContext(AuthContext);
     const [formData, setFormData] = useState({
       size: "",
@@ -103,7 +105,35 @@ const CheckTable = ({updateMessage,bookedRom }) => {
     );
     setCheck(filtered);
     setLoading(false)
+    setCurrentPage(1); // Reset to first page on search
 };
+  const totalPages = Math.ceil(checks.length / rowsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  const handleRowsChange = (e) => {
+    setRowsPerPage(parseInt(e.target.value));
+    setCurrentPage(1); // Reset to first page on change
+  };
+
+  const paginatedChecks = checks.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
   // Delete Function
   const handleDelete = async (checkId) => {
     const confirmDelete = window.confirm(`Are you sure you want to delete Check with Check Number ${checkId}?`);
@@ -148,10 +178,11 @@ const handleUpdate = async () => {
       formData
     );
 
-    const newData = checks.map((u) =>
-      u.id === selectedCheck.id ? { ...u, ...formData } : u
-    );
-    setCheck(newData);
+    const updatedCheck = { ...selectedCheck, ...formData };
+    const rest = checks.filter((u) => u.id !== selectedCheck.id);
+    // Bring the most recently edited check to the front of the list
+    setCheck([updatedCheck, ...rest]);
+    setCurrentPage(1);
     closeModal();
   } catch (err) {
     console.error("Update error:", err);
@@ -246,6 +277,16 @@ const handleClose= () => {
                     />
                     <Search className='absolute left-3 top-2.5 text-gray-400' size={18} />
                 </div>
+                <select
+                    value={rowsPerPage}
+                    onChange={handleRowsChange}
+                    className='bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                >
+                    <option value={5}>5 / page</option>
+                    <option value={10}>10 / page</option>
+                    <option value={25}>25 / page</option>
+                    <option value={50}>50 / page</option>
+                </select>
         </div>
         {selectedRow && (
           <div className="mt-4 p-4 border rounded">
@@ -313,7 +354,7 @@ const handleClose= () => {
                         </tr>
                     </thead>
                     <tbody className='divide divide-gray-700'>
-                        {checks.map((check) => (
+                        {paginatedChecks.map((check) => (
                             <motion.tr
                                 key={check.id}
                                 initial={{ opacity: 0 }}
@@ -351,6 +392,39 @@ const handleClose= () => {
                     </tbody>
                 </table>
      }
+     {showChecksTable && totalPages > 0 && (
+        <div className="flex justify-between items-center mt-4">
+          <button
+            onClick={handlePrevious}
+            disabled={currentPage === 1}
+            className="px-3 py-1 bg-blue-700 rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+
+          <div className="space-x-1">
+            {[...Array(totalPages).keys()].map((number) => (
+              <button
+                key={number}
+                onClick={() => handlePageChange(number + 1)}
+                className={`px-3 py-1 border rounded ${
+                  currentPage === number + 1 ? 'bg-blue-500 text-green-950' : 'bg-green-950'
+                }`}
+              >
+                {number + 1}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={handleNext}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 bg-blue-700 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+     )}
         {/* Edit Modal */}
       {showModal && (
         <div className="bg-gray-800 bg-opacity-50 bg-opacity-50 flex items-center justify-center z-50">
