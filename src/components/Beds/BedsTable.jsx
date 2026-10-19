@@ -18,6 +18,7 @@ const BedsTable = ({updateMessage}) => {
     const[selectedBed, setSelectedBed] = useState(null);
     const[showBedsTable, setShowBedsTable]= useState(true);
 	const[showModal, setShowModal] = useState(false);
+	const[confirmDelete, setConfirmDelete] = useState(false);
 	const { logout } = useContext(AuthContext);
 	const [formData, setFormData] = useState({
 		size:"",
@@ -92,16 +93,19 @@ const BedsTable = ({updateMessage}) => {
 		setShowModal(false);
 		setShowBedsTable(true);
 	  };
+	  const HandleConfrimDelete = (bedId) => {
+		setConfirmDelete(true)
+	  }
 	   // Delete Function
-  const handleDelete = async (bedId) => {
+  	const handleDelete = async (bedId) => {
     // const confirmDelete = window.confirm("Are you sure you want to delete?");
     if (!bedId) return;
 
     try {
 		const token = sessionStorage.getItem('token')
 		if(!token) return;
-		await fetch(`${import.meta.env.VITE_API_BASE_URL}/hotel/bed/${bedId}`, {
-			method: "DELETE",
+		await fetch(`${import.meta.env.VITE_API_BASE_URL}/hotel/bed/activate/${bedId}`, {
+			method: "PUT",
 			headers: {
 				"Authorization": `Bearer ${JSON.parse(token)}`,
 				"Content-Type": "application/json",  // if you're sending JSON
@@ -158,7 +162,7 @@ const BedsTable = ({updateMessage}) => {
 	  console.error("Update error:", err);
 	}
   };
-	  const openEditModal = (row) => {
+  const openEditModal = (row) => {
 		setSelectedBed(row);
 		console.log(row);
 		setFormData(
@@ -174,8 +178,9 @@ const BedsTable = ({updateMessage}) => {
 		  }
 		);
 		setShowModal(true);
+		setConfirmDelete(false)
 		setShowBedsTable(false)
-	  };
+	};
 	//   const openEdit = ()=> {
 	// 	setShowModal(true)
 	// 	setShowBedsTable(false)
@@ -298,12 +303,11 @@ const BedsTable = ({updateMessage}) => {
 				<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 				<button className='text-red-400 hover:text-red-300' onClick={() => handleChangeStatus(bed.id)}>
 						<X size={18} />
-						
 					</button>
 					<button className='text-indigo-400 hover:text-indigo-300 mr-2' onClick={()=> openEditModal(bed)}>
 						<Edit size={18} />
 					</button>
-					<button className='text-red-400 hover:text-red-300' onClick={() => handleDelete(bed.id)}>
+					<button className='text-red-400 hover:text-red-300' onClick={() => HandleConfrimDelete(bed.id)}>
 						<Trash2 size={18} />
 					</button>
 				</td>
@@ -320,129 +324,253 @@ const BedsTable = ({updateMessage}) => {
 
 			</div>
 			{showModal && (
-        <div className="bg-gray-800 bg-opacity-50 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 bg-opacity-50 bg-opacity-50 rounded-xl p-6 w-full max-w-md shadow-lg">
-            <h3 className="text-lg font-bold mb-4">Edit Room</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block mb-1 text-sm font-medium">Bed Size</label>
-                <input
-                      type="text"
-                      name="size"
-                      value={formData.size}
-                      onChange={(e) =>
-                        setFormData({ ...formData, size: e.target.value })
-                      }
-                      className="border p-2 w-full rounded"
-                    />
-              </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Bed Number</label>
-                <input
-                      type="text"
-                      name="bed_num"
-                      value={formData.bed_num}
-                      onChange={(e) =>
-                        setFormData({ ...formData, bed_num: e.target.value })
-                      }
-                      className="border p-2 w-full rounded"
-                    />
-              </div>
-			
-              <div>
-                <label className="block mb-1 text-sm font-medium">Currency</label>
-                <input
-                      type="text"
-                      name="currency"
-                      value={formData.currency}
-                      onChange={(e) =>
-                        setFormData({ ...formData, currency: e.target.value })
-                      }
-                      className="border p-2 w-full rounded"
-                    />
-              </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Price</label>
-                <input
-                      type="text"
-                      name="price"
-                      value={formData.price}
-                      onChange={(e) =>
-                        setFormData({ ...formData, price: e.target.value })
-                      }
-                      className="border p-2 w-full rounded"
-                    />
-              </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Status</label>
-                <input
-                      type="text"
-                      name="status"
-                      value={formData.status}
-                      onChange={(e) =>
-                        setFormData({ ...formData, status: e.target.value })
-                      }
-                      className="border p-2 w-full rounded"
-                    />
-              </div>
-			    	{/* 
-		matt_size:"",
-		magnitude:"",
-		bed_size_name:"" */}
-              <div>
-                <label className="block mb-1 text-sm font-medium">Mattress Size</label>
-                <input
-                      type="text"
-                      name="matt_size"
-                      value={formData.matt_size}
-                      onChange={(e) =>
-                        setFormData({ ...formData, matt_size: e.target.value })
-                      }
-                      className="border p-2 w-full rounded"
-                    />
-              </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Magnitude</label>
-                <input
-                      type="text"
-                      name="magnitude"
-                      value={formData.magnitude}
-                      onChange={(e) =>
-                        setFormData({ ...formData, magnitude: e.target.value })
-                      }
-                      className="border p-2 w-full rounded"
-                    />
-              </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Bed Size Name</label>
-                <input
-                      type="text"
-                      name="bed_size_name"
-                      value={formData.bed_size_name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, bed_size_name: e.target.value })
-                      }
-                      className="border p-2 w-full rounded"
-                    />
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 mt-6">
-              <button
-                onClick={closeModal}
-                className="bg-gray-300 text-black px-4 py-2 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleUpdate}
-                className="bg-green-500 text-white px-4 py-2 rounded"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}            
+				<div className="bg-gray-800 bg-opacity-50 bg-opacity-50 flex items-center justify-center z-50">
+				<div className="bg-gray-800 bg-opacity-50 bg-opacity-50 rounded-xl p-6 w-full max-w-md shadow-lg">
+					<h3 className="text-lg font-bold mb-4">Edit Room</h3>
+					<div className="space-y-4">
+					<div>
+						<label className="block mb-1 text-sm font-medium">Bed Size</label>
+						<input
+							type="text"
+							name="size"
+							value={formData.size}
+							onChange={(e) =>
+								setFormData({ ...formData, size: e.target.value })
+							}
+							className="border p-2 w-full rounded"
+							/>
+					</div>
+					<div>
+						<label className="block mb-1 text-sm font-medium">Bed Number</label>
+						<input
+							type="text"
+							name="bed_num"
+							value={formData.bed_num}
+							onChange={(e) =>
+								setFormData({ ...formData, bed_num: e.target.value })
+							}
+							className="border p-2 w-full rounded"
+							/>
+					</div>
+					
+					<div>
+						<label className="block mb-1 text-sm font-medium">Currency</label>
+						<input
+							type="text"
+							name="currency"
+							value={formData.currency}
+							onChange={(e) =>
+								setFormData({ ...formData, currency: e.target.value })
+							}
+							className="border p-2 w-full rounded"
+							/>
+					</div>
+					<div>
+						<label className="block mb-1 text-sm font-medium">Price</label>
+						<input
+							type="text"
+							name="price"
+							value={formData.price}
+							onChange={(e) =>
+								setFormData({ ...formData, price: e.target.value })
+							}
+							className="border p-2 w-full rounded"
+							/>
+					</div>
+					<div>
+						<label className="block mb-1 text-sm font-medium">Status</label>
+						<input
+							type="text"
+							name="status"
+							value={formData.status}
+							onChange={(e) =>
+								setFormData({ ...formData, status: e.target.value })
+							}
+							className="border p-2 w-full rounded"
+							/>
+					</div>
+							{/* 
+				matt_size:"",
+				magnitude:"",
+				bed_size_name:"" */}
+					<div>
+						<label className="block mb-1 text-sm font-medium">Mattress Size</label>
+						<input
+							type="text"
+							name="matt_size"
+							value={formData.matt_size}
+							onChange={(e) =>
+								setFormData({ ...formData, matt_size: e.target.value })
+							}
+							className="border p-2 w-full rounded"
+							/>
+					</div>
+					<div>
+						<label className="block mb-1 text-sm font-medium">Magnitude</label>
+						<input
+							type="text"
+							name="magnitude"
+							value={formData.magnitude}
+							onChange={(e) =>
+								setFormData({ ...formData, magnitude: e.target.value })
+							}
+							className="border p-2 w-full rounded"
+							/>
+					</div>
+					<div>
+						<label className="block mb-1 text-sm font-medium">Bed Size Name</label>
+						<input
+							type="text"
+							name="bed_size_name"
+							value={formData.bed_size_name}
+							onChange={(e) =>
+								setFormData({ ...formData, bed_size_name: e.target.value })
+							}
+							className="border p-2 w-full rounded"
+							/>
+					</div>
+					</div>
+					<div className="flex justify-end gap-2 mt-6">
+					<button
+						onClick={closeModal}
+						className="bg-gray-300 text-black px-4 py-2 rounded"
+					>
+						Cancel
+					</button>
+					<button
+						onClick={handleUpdate}
+						className="bg-green-500 text-white px-4 py-2 rounded"
+					>
+						Save
+					</button>
+					</div>
+				</div>
+				</div>
+			)} 
+			{confirmDelete && (
+				<div className="bg-gray-800 bg-opacity-50 bg-opacity-50 flex items-center justify-center z-50">
+				<div className="bg-gray-800 bg-opacity-50 bg-opacity-50 rounded-xl p-6 w-full max-w-md shadow-lg">
+					<h3 className="text-lg font-bold mb-4">Edit Room</h3>
+					<div className="space-y-4">
+					<div>
+						<label className="block mb-1 text-sm font-medium">Bed Size</label>
+						<input
+							type="text"
+							name="size"
+							value={formData.size}
+							onChange={(e) =>
+								setFormData({ ...formData, size: e.target.value })
+							}
+							className="border p-2 w-full rounded"
+							/>
+					</div>
+					<div>
+						<label className="block mb-1 text-sm font-medium">Bed Number</label>
+						<input
+							type="text"
+							name="bed_num"
+							value={formData.bed_num}
+							onChange={(e) =>
+								setFormData({ ...formData, bed_num: e.target.value })
+							}
+							className="border p-2 w-full rounded"
+							/>
+					</div>
+					
+					<div>
+						<label className="block mb-1 text-sm font-medium">Currency</label>
+						<input
+							type="text"
+							name="currency"
+							value={formData.currency}
+							onChange={(e) =>
+								setFormData({ ...formData, currency: e.target.value })
+							}
+							className="border p-2 w-full rounded"
+							/>
+					</div>
+					<div>
+						<label className="block mb-1 text-sm font-medium">Price</label>
+						<input
+							type="text"
+							name="price"
+							value={formData.price}
+							onChange={(e) =>
+								setFormData({ ...formData, price: e.target.value })
+							}
+							className="border p-2 w-full rounded"
+							/>
+					</div>
+					<div>
+						<label className="block mb-1 text-sm font-medium">Status</label>
+						<input
+							type="text"
+							name="status"
+							value={formData.status}
+							onChange={(e) =>
+								setFormData({ ...formData, status: e.target.value })
+							}
+							className="border p-2 w-full rounded"
+							/>
+					</div>
+							{/* 
+				matt_size:"",
+				magnitude:"",
+				bed_size_name:"" */}
+					<div>
+						<label className="block mb-1 text-sm font-medium">Mattress Size</label>
+						<input
+							type="text"
+							name="matt_size"
+							value={formData.matt_size}
+							onChange={(e) =>
+								setFormData({ ...formData, matt_size: e.target.value })
+							}
+							className="border p-2 w-full rounded"
+							/>
+					</div>
+					<div>
+						<label className="block mb-1 text-sm font-medium">Magnitude</label>
+						<input
+							type="text"
+							name="magnitude"
+							value={formData.magnitude}
+							onChange={(e) =>
+								setFormData({ ...formData, magnitude: e.target.value })
+							}
+							className="border p-2 w-full rounded"
+							/>
+					</div>
+					<div>
+						<label className="block mb-1 text-sm font-medium">Bed Size Name</label>
+						<input
+							type="text"
+							name="bed_size_name"
+							value={formData.bed_size_name}
+							onChange={(e) =>
+								setFormData({ ...formData, bed_size_name: e.target.value })
+							}
+							className="border p-2 w-full rounded"
+							/>
+					</div>
+					</div>
+					<div className="flex justify-end gap-2 mt-6">
+					<button
+						onClick={closeModal}
+						className="bg-gray-300 text-black px-4 py-2 rounded"
+					>
+						Cancel
+					</button>
+					<button
+						onClick={handleUpdate}
+						className="bg-green-500 text-white px-4 py-2 rounded"
+					>
+						Save
+					</button>
+					</div>
+				</div>
+				</div>
+			)}           
 		</motion.div>
 	);
 }
