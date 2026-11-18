@@ -8,7 +8,7 @@ import { AuthContext } from '../../context/AuthContext';
 import {isTokenExpired} from '../../context/AuthUtil'
 import Buttons from '../common/Buttons';
 import LoadingRing from '../common/LoadingRing';
-import { getPaymentStatusLabel, getStatusBadgeClass } from '../Utils/helpers';
+import { getPaymentStatusLabel, getStatusBadgeClass, getCurrencySymbol, getPaymentIcon } from "../Utils/helpers";
 
 const PaymentsTable = ({updateMessage}) => {
     const [isLoading, setIsLoading] = useState(true);
@@ -144,7 +144,8 @@ const PaymentsTable = ({updateMessage}) => {
 					`${import.meta.env.VITE_API_BASE_URL}/hotel/payment/${selectedPayment.id}`,
 					{
 						"payment_method": payment_method === "OTHER" ? other : payment_method,
-						"payment_status": "SUC",
+						// "payment_status": "SUC",
+						"payment_status": "PYD",
 						"amount": amount,
 						"tax": amount * Number(import.meta.env.VITE_API_TAX)/100,
 						"updated_by": JSON.parse(user).first_name + ' ' + JSON.parse(user).last_name,
@@ -241,9 +242,6 @@ const PaymentsTable = ({updateMessage}) => {
 								Payment fee
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
-								Currency
-							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Amount
 							</th>
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
@@ -278,22 +276,13 @@ const PaymentsTable = ({updateMessage}) => {
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 								{payment.booking_id}
 							</td>
-							{/* <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100 flex gap-2 items-center'>
-								<img
-									src='https://images.unsplash.com/photo-1627989580309-bfaf3e58af6f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8d2lyZWxlc3MlMjBlYXJidWRzfGVufDB8fDB8fHww'
-									alt='Product img'
-									className='size-10 rounded-full'
-								/>
-								{payment.created_by}
-							</td> */}
-							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.exchange_rate}</td>
-							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.net_mount}</td>
-							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.payment_fee}</td>
-							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.currency}</td>
-							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.amount}</td>
-							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.tax}</td>
-							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.tax + payment.amount}</td>
-							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.payment_method}</td>
+							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{(Math.round(payment.exchange_rate * 100) / 100) || ''}</td>
+							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.net_mount  > 0 ? (getCurrencySymbol(payment.net_mount_currency) || '') + " " + payment.net_mount : "-"}</td>
+							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{payment.payment_fee > 0 ? getCurrencySymbol(payment.currency) + " " + payment.payment_fee : "-"}</td>
+							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{getCurrencySymbol(payment.currency)} {payment.amount}</td>
+							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{getCurrencySymbol(payment.currency)} {payment.tax}</td>
+							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{getCurrencySymbol(payment.currency)} {payment.tax + payment.amount}</td>
+							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{getPaymentIcon(payment.payment_method)}</td>
 							<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 								<span
 									className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(payment.payment_status)}`}>
@@ -304,7 +293,7 @@ const PaymentsTable = ({updateMessage}) => {
 							<button className='text-red-400 hover:text-red-300' onClick={() => handleChangeStatus(payment.id)}>
 									<X size={18} />
 								</button>
-								{payment.payment_status !== 'SUC' &&
+								{(payment.payment_status !== 'SUC' && payment.payment_status !== 'PYD') &&
 								<><button className='text-indigo-400 hover:text-indigo-300 mr-2' onClick={()=> openEditModal(payment)}>
 									<Edit size={18} />
 								</button>

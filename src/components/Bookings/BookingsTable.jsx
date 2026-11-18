@@ -8,7 +8,7 @@ import StatCard from "../common/StatCard";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Package,TrendingUp, AlertTriangle,DollarSign, EuroIcon } from 'lucide-react'
-import { getPaymentStatusLabel, getStatusBadgeClass } from "../Utils/helpers";
+import { getPaymentStatusLabel, getStatusBadgeClass, getCurrencySymbol, getPaymentIcon } from "../Utils/helpers";
 
 const BookingsTable = () => {
 	const formatDate = (date) => {
@@ -424,9 +424,9 @@ const generateInvoice = async (booking) => {
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Payment Method
 							</th>
-							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
+							{/* <th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Currency
-							</th>
+							</th> */}
 							<th className='px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider'>
 								Booking Date
 							</th>
@@ -455,14 +455,13 @@ const generateInvoice = async (booking) => {
 					transition={{ duration: 0.3 }}>
 
 					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{bookingId+1}</td>
-					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.reference}</td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>#{booking.reference}</td>
 					<td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100 flex gap-2 items-center'>{booking.booking_name}</td>
-					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.customer_id}</td>
-					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.amount :'not yet payed'}</td> 
-					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.tax :'no tax info'}</td>
-					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? (Number(booking.payment.amount) + Number(booking.payment.tax)).toFixed(2) :'no total amount'}</td>
-					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.payment_method:'no payment method'}</td>
-					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? booking.payment.currency:'no currency'}</td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>#{booking.customer_id}</td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? getCurrencySymbol(booking.payment.currency) : ''} {booking.payment ? booking.payment.amount : ''}</td> 
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? getCurrencySymbol(booking.payment.currency):''} {booking.payment ? booking.payment.tax :''}</td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? getCurrencySymbol(booking.payment.currency):''} {booking.payment ? (Number(booking.payment.amount) + Number(booking.payment.tax)).toFixed(2) :''}</td>
+					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.payment ? getPaymentIcon(booking.payment.payment_method) : ''}</td>
 					<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>{booking.booking_date}</td>
 									<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
 						<span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(booking.payment?.payment_status)}`}>

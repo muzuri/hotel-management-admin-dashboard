@@ -309,7 +309,7 @@ const handleClose= () => {
 					</thead>
 
 					<tbody className='divide divide-gray-700'>
-						{rooms.map((room) => (
+						{rooms.sort((a, b) => a.room_num - b.room_num).map((room) => (
 							<motion.tr
               // className='hover:bg-amber-950'
 								key={room.id}

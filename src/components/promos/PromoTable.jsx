@@ -269,7 +269,7 @@ const PromosTable = ({updateMessage}) => {
 
 					<tbody className='divide-y divide-gray-700'>		
           {filteredData.length > 0 ? (
-           filteredData.map((promo) => (
+           filteredData.sort((a, b) => a.id - b.id).map((promo) => (
 			<motion.tr
 				key={promo.id}
 				initial={{ opacity: 0 }}
